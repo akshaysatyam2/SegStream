@@ -1,71 +1,55 @@
 # SegStream
 
-A lightweight, open-source alternative to OBS Studio — built for developers who want real-time AI background removal without a green screen.
+A lightweight, open-source alternative to OBS Studio — real-time AI background removal, no green screen needed.
 
-SegStream captures your screen and webcam simultaneously, runs YOLO segmentation on the webcam feed to extract your body, and composites it onto the screen recording in real-time. No chroma key. No bulky software. Just clean segmentation.
+SegStream captures your screen and webcam simultaneously, runs YOLO segmentation on the webcam feed to extract your body, and composites it directly onto the screen recording. Clean segmentation, minimal latency, works with or without a GPU.
 
 ---
 
-## What It Does
+## Why SegStream?
 
-- **Screen + Webcam Recording** — Captures both streams via browser APIs (`getDisplayMedia` + `getUserMedia`).
-- **Real-Time Background Removal** — Runs YOLO26 Nano Segmentation (`yolo26n-seg`) on your webcam feed. Your background disappears; you stay.
-- **Live Compositing** — Overlays the segmented body onto the screen recording at a position and scale you control via drag-and-drop.
-- **Local Recording** — Saves the composited output as a video file (via OpenCV or FFmpeg).
-- **RTSP Streaming** — Optionally broadcasts the composited feed as an RTSP stream — push it to YouTube, Twitch, or share it on your local network.
+OBS is great, but it's bloated for a simple use case: **record your screen with a webcam overlay that has no background**. Most virtual background tools either need a green screen or run through clunky browser extensions. SegStream handles it natively — one tool, no dependencies on third-party plugins.
+
+---
+
+## Features
+
+- **Screen + Webcam Capture** — Uses browser APIs (`getDisplayMedia` + `getUserMedia`) to grab both streams natively.
+- **AI Background Removal** — YOLO26 Nano Segmentation strips your background in real-time. No green screen, no manual masking.
+- **Drag-and-Drop Positioning** — Place and resize your webcam overlay anywhere on the screen recording before you hit record.
+- **Local Recording** — Saves composited output as MP4 (OpenCV VideoWriter / FFmpeg).
+- **RTSP Streaming** — Optionally broadcast the composited feed over RTSP — push to YouTube, Twitch, or use as a virtual camera source.
+- **Hardware Acceleration** — ONNX Runtime with automatic fallback: CUDA → OpenVINO → CPU. Zero config needed.
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   Browser (Frontend)                    │
-│                                                         │
-│  getDisplayMedia ──► Screen Stream ──┐                  │
-│                                      ├──► WebSocket ──► │
-│  getUserMedia ─────► Webcam Stream ──┘    / WebRTC      │
-│                                                         │
-│  Drag-and-Drop UI ──► Position (X, Y) + Scale ────────► │
-└─────────────────────────────────────────────────────────┘
+Browser (Frontend)
+├── getDisplayMedia ──► Screen Stream ──┐
+│                                       ├──► WebSocket / WebRTC
+├── getUserMedia ─────► Webcam Stream ──┘
+└── Overlay UI ───────► Position + Scale coords
                           │
                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                  Python Backend                         │
-│                                                         │
-│  Webcam Frame ──► YOLO26n-seg (ONNX) ──► Person Mask   │
-│                                                         │
-│  Screen Frame + Masked Person ──► Alpha Compositing     │
-│                                                         │
-│  Composited Frame ──► VideoWriter (local .mp4)          │
-│                   ──► RTSP Stream (optional)            │
-└─────────────────────────────────────────────────────────┘
+Python Backend
+├── Receive synced streams
+├── YOLO26n-seg (ONNX Runtime) ──► Person Mask
+├── Alpha Compositing (OpenCV/NumPy)
+├── ──► Local MP4 Recording
+└── ──► RTSP Stream (optional)
 ```
 
-### Inference — Hardware Fallback
+### ONNX Execution Provider Fallback
 
-All inference runs through `onnxruntime` with a strict provider hierarchy:
+| Priority | Provider                    | Hardware         |
+|----------|-----------------------------|------------------|
+| 1        | `CUDAExecutionProvider`     | NVIDIA GPU       |
+| 2        | `OpenVINOExecutionProvider` | Intel CPU / iGPU |
+| 3        | `CPUExecutionProvider`      | Any machine      |
 
-| Priority | Provider                  | Hardware           |
-|----------|---------------------------|--------------------|
-| 1        | `CUDAExecutionProvider`   | NVIDIA GPU         |
-| 2        | `OpenVINOExecutionProvider` | Intel CPU/iGPU   |
-| 3        | `CPUExecutionProvider`    | Any machine        |
-
-No manual config needed — SegStream auto-detects the best available provider at startup.
-
----
-
-## Tech Stack
-
-| Layer      | Tech                                                  |
-|------------|-------------------------------------------------------|
-| Frontend   | HTML / JavaScript (vanilla)                           |
-| Streaming  | WebSocket / WebRTC (`aiortc`)                         |
-| Backend    | Python, OpenCV, NumPy                                 |
-| Inference  | ONNX Runtime + YOLO26 Nano Seg                        |
-| Recording  | OpenCV `VideoWriter` / FFmpeg subprocess              |
-| Broadcast  | RTSP via `mediamtx` / GStreamer                       |
+Auto-detected at startup. No manual configuration.
 
 ---
 
@@ -73,113 +57,111 @@ No manual config needed — SegStream auto-detects the best available provider a
 
 ```
 SegStream/
-├── frontend/               # Browser-based capture & positioning UI
-│   ├── index.html
+├── frontend/
+│   ├── index.html          # Capture UI + overlay positioning
 │   ├── style.css
-│   └── app.js
+│   └── app.js              # Stream capture + backend connection
 ├── backend/
-│   ├── server.py           # WebSocket/WebRTC server — receives streams
+│   ├── server.py           # WebSocket/WebRTC server
 │   ├── segmentation.py     # YOLO26 ONNX inference + mask extraction
 │   ├── compositor.py       # Alpha blending — person onto screen
-│   ├── recorder.py         # Local video recording (OpenCV / FFmpeg)
+│   ├── recorder.py         # Local video recording
 │   ├── streamer.py         # RTSP stream output
 │   └── providers.py        # ONNX EP detection + fallback logic
-├── models/                 # ONNX model files (not tracked in git)
-│   └── yolo26n-seg.onnx
+├── models/
+│   └── yolo26n-seg.onnx    # Not tracked — download separately
 ├── requirements.txt
-├── .cursorrules            # Project spec & AI assistant instructions
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Quick Start
+## Getting Started
 
 ### Prerequisites
 
 - Python 3.10+
-- A modern browser (Chrome / Edge recommended for `getDisplayMedia`)
-- (Optional) NVIDIA GPU with CUDA for accelerated inference
+- Modern browser (Chrome or Edge recommended)
+- (Optional) NVIDIA GPU with CUDA for faster inference
 
-### 1. Clone & Install
+### Install
 
 ```bash
 git clone https://github.com/akshaysatyam2/SegStream.git
 cd SegStream
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Export the YOLO26 Model to ONNX
+### Export YOLO26 Model to ONNX
 
 ```bash
-# Using ultralytics CLI
+pip install ultralytics
 yolo export model=yolo26n-seg.pt format=onnx imgsz=640 simplify=True
-mv yolo26n-seg.onnx models/
+mkdir -p models && mv yolo26n-seg.onnx models/
 ```
 
-### 3. Start the Backend
+### Run
+
+**Start the backend:**
 
 ```bash
 python backend/server.py
 ```
 
-The server will auto-detect the best ONNX execution provider and log it:
 ```
-[SegStream] Using CUDAExecutionProvider
+[SegStream] Detected: CUDAExecutionProvider
 [SegStream] Server running on ws://localhost:8765
 ```
 
-### 4. Open the Frontend
-
-Open `frontend/index.html` in your browser (or serve it via a simple HTTP server):
+**Serve the frontend:**
 
 ```bash
 python -m http.server 3000 --directory frontend
 ```
 
-Navigate to `http://localhost:3000`, select your screen/window, position your webcam overlay, and hit record.
+Open `http://localhost:3000` — select your screen/window, position the webcam overlay, hit record.
 
-### 5. (Optional) RTSP Stream
+### RTSP Streaming (Optional)
 
-To expose the composited output as an RTSP stream:
+Start an RTSP server like [mediamtx](https://github.com/bluenviron/mediamtx):
 
 ```bash
-# Start mediamtx (or your preferred RTSP server)
 ./mediamtx
-
-# SegStream will push frames to rtsp://localhost:8554/segstream
 ```
 
-Use this URL in OBS, VLC, or as a source for YouTube/Twitch.
+SegStream pushes frames to `rtsp://localhost:8554/segstream`. Use this URL in OBS, VLC, or as a stream source for YouTube/Twitch.
 
 ---
 
-## Target Performance
+## Performance Targets
 
-| Metric              | Target          |
-|---------------------|-----------------|
-| Compositing FPS     | 30–60 FPS       |
-| Inference latency   | < 15ms (GPU)    |
-| End-to-end latency  | < 100ms         |
-| Model size (ONNX)   | ~12 MB (nano)   |
+| Metric            | Target        |
+|--------------------|--------------|
+| Compositing FPS    | 30–60 FPS    |
+| Inference latency  | < 15ms (GPU) |
+| End-to-end latency | < 100ms      |
+| Model size (ONNX)  | ~12 MB       |
 
 ---
 
 ## Roadmap
 
-- [ ] Core backend — stream reception, YOLO inference, compositing
-- [ ] Frontend — screen/webcam capture, positioning UI
-- [ ] Local recording (MP4 output)
-- [ ] RTSP streaming
-- [ ] Multi-person segmentation support
-- [ ] Audio capture & sync
-- [ ] Electron/Tauri wrapper for native desktop app
+- [ ] Core backend — stream reception, YOLO inference, compositing pipeline
+- [ ] Frontend — screen/webcam capture, drag-and-drop overlay UI
+- [ ] Local recording (MP4 output via OpenCV/FFmpeg)
+- [ ] RTSP streaming support
+- [ ] Audio capture and sync
+- [ ] Multi-person segmentation
+- [ ] Desktop app wrapper (Electron / Tauri)
 
 ---
 
 ## Contributing
 
-This project is in active development. If you're a CV engineer, ML enthusiast, or just want a better screen recorder — PRs are welcome.
+Project is in active development. PRs, issues, and feedback are welcome — especially from folks working in CV or real-time video pipelines.
 
 ---
 
