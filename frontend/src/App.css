@@ -1,0 +1,166 @@
+/**
+ * App.css — Main Application Layout Styles
+ *
+ * Defines the root layout structure and the desktop studio grid.
+ * This file handles the top-level layout only — individual component
+ * styles live in their own CSS files.
+ *
+ * Layout breakdown:
+ *   .app              — Full viewport flex column (header + main + statusbar)
+ *   .studio-layout    — CSS Grid for the desktop streaming studio
+ *   .studio-layout__sidebar  — Left/right settings panels
+ *   .studio-layout__preview  — Center stream preview (grows to fill)
+ *   .studio-layout__controls — Bottom recording controls bar
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   ROOT APP CONTAINER
+   Full viewport height flex column. Header and StatusBar are
+   fixed-height; main fills the remaining space.
+   ============================================================ */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  background: var(--ss-bg-primary);
+  color: var(--ss-text-primary);
+  overflow-x: hidden;
+}
+
+.app__main {
+  flex: 1;
+  display: flex;
+  padding: 16px;
+  gap: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   DESKTOP STUDIO LAYOUT (>= 1024px)
+   CSS Grid with named areas for intuitive layout management.
+   
+   Grid template:
+   ┌──────────┬────────────────────┬──────────┐
+   │  sidebar  │     preview        │ sidebar  │
+   │  (left)   │                    │ (right)  │
+   ├──────────┴────────────────────┴──────────┤
+   │              controls                     │
+   └───────────────────────────────────────────┘
+   ============================================================ */
+
+.studio-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "left preview right"
+    "controls controls controls";
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 0; /* Prevent grid blowout */
+}
+
+.studio-layout__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Subtle scrollbar for sidebar panels */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ss-text-muted) transparent;
+}
+
+.studio-layout__sidebar--left {
+  grid-area: left;
+}
+
+.studio-layout__sidebar--right {
+  grid-area: right;
+}
+
+.studio-layout__preview {
+  grid-area: preview;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0; /* Prevent content from overflowing grid cell */
+}
+
+.studio-layout__controls {
+  grid-area: controls;
+}
+
+/* ============================================================
+   RESPONSIVE: LAPTOP (1024px - 1440px)
+   Narrower sidebars to give more room to the preview.
+   ============================================================ */
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .studio-layout {
+    grid-template-columns: 260px 1fr 260px;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE: LARGE DESKTOP (> 1440px)
+   Wider sidebars, more breathing room overall.
+   ============================================================ */
+
+@media (min-width: 1441px) {
+  .studio-layout {
+    grid-template-columns: 340px 1fr 340px;
+    gap: 20px;
+  }
+
+  .app__main {
+    padding: 20px;
+    gap: 20px;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE: MOBILE / TABLET (< 1024px)
+   Studio layout is hidden — MobileViewer takes over.
+   Main just becomes a simple flex container.
+   ============================================================ */
+
+@media (max-width: 1023px) {
+  .app__main {
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 639px) {
+  .app__main {
+    padding: 8px;
+    gap: 8px;
+  }
+}
+
+/* ============================================================
+   SMOOTH PAGE TRANSITIONS
+   Fade-in on initial load for a polished feel.
+   ============================================================ */
+
+.app {
+  animation: app-fade-in 0.4s ease-out;
+}
+
+@keyframes app-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

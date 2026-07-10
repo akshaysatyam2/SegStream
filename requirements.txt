@@ -1,0 +1,19 @@
+# SegStream Backend — Python Video Processing Pipeline
+# Requirements file for pip install
+# Author: Akshay
+
+# ── Web Server & WebRTC ──────────────────────────────────────────────────────
+aiohttp>=3.9.0,<4.0.0
+aiortc>=1.9.0,<2.0.0
+aiohttp-cors>=0.7.0
+
+# ── Computer Vision & Image Processing ───────────────────────────────────────
+opencv-python-headless>=4.9.0,<5.0.0
+numpy>=1.26.0
+Pillow>=10.2.0
+
+# ── ONNX Runtime (base CPU — install onnxruntime-gpu for CUDA support) ──────
+onnxruntime>=1.17.0,<2.0.0
+
+# ── Video Frame Handling (used by aiortc internally, pinned for stability) ──
+av>=12.0.0

@@ -1,0 +1,241 @@
+/**
+ * MobileViewer.css — Mobile/Tablet Layout Styles
+ *
+ * Card-based vertical stack optimized for touch screens.
+ * Each card is a glassmorphism panel with rounded corners.
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   MOBILE VIEWER CONTAINER
+   Vertical stack of cards filling the main area.
+   ============================================================ */
+.mobile-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   CARD
+   Each section is a glassmorphism card.
+   ============================================================ */
+.mobile-viewer__card {
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobile-viewer__card--preview {
+  padding: 16px;
+}
+
+.mobile-viewer__card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ss-text-primary);
+  margin: 0;
+}
+
+.mobile-viewer__card-title svg {
+  color: var(--ss-accent);
+}
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+.mobile-viewer__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-viewer__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.mobile-viewer__status-dot--disconnected {
+  background: var(--ss-text-muted);
+}
+
+.mobile-viewer__status-dot--connecting {
+  background: var(--ss-warning);
+  animation: mobile-status-pulse 1.5s ease-in-out infinite;
+}
+
+.mobile-viewer__status-dot--connected {
+  background: var(--ss-success);
+}
+
+.mobile-viewer__status-dot--error {
+  background: var(--ss-error);
+}
+
+@keyframes mobile-status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.mobile-viewer__status-text {
+  font-size: 13px;
+  color: var(--ss-text-secondary);
+  text-transform: capitalize;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.mobile-viewer__buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.mobile-viewer__btn {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--ss-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ss-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--ss-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mobile-viewer__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mobile-viewer__btn--primary {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: var(--ss-accent);
+}
+
+.mobile-viewer__btn--primary:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.25);
+}
+
+.mobile-viewer__btn--secondary {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mobile-viewer__btn--secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.mobile-viewer__btn--danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--ss-error);
+}
+
+.mobile-viewer__btn--danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Record button special states */
+.mobile-viewer__btn--record {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.mobile-viewer__btn--recording {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--ss-error);
+  color: var(--ss-error);
+}
+
+.mobile-viewer__rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ss-error);
+  animation: mobile-rec-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes mobile-rec-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   VIDEO ELEMENTS
+   ============================================================ */
+.mobile-viewer__video {
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
+.mobile-viewer__webcam-preview {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 8px;
+  background: #000;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transform: scaleX(-1);
+  align-self: center;
+}
+
+/* ============================================================
+   PLACEHOLDER
+   ============================================================ */
+.mobile-viewer__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px dashed var(--ss-border);
+}
+
+.mobile-viewer__placeholder p {
+  font-size: 13px;
+  color: var(--ss-text-muted);
+  text-align: center;
+  margin: 0;
+  padding: 16px;
+}
+
+/* ============================================================
+   RESPONSIVE — Extra small phones
+   ============================================================ */
+@media (max-width: 479px) {
+  .mobile-viewer__card {
+    padding: 16px;
+  }
+
+  .mobile-viewer__buttons {
+    flex-direction: column;
+  }
+
+  .mobile-viewer__btn {
+    padding: 14px 16px;
+  }
+}

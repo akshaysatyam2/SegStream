@@ -1,0 +1,155 @@
+/**
+ * StatusBar.css — Bottom Status Bar Styles
+ *
+ * Thin bar at the bottom of the viewport showing real-time
+ * streaming stats. Uses glassmorphism with minimal height.
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   STATUS BAR CONTAINER
+   ============================================================ */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 24px;
+  background: var(--ss-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--ss-border);
+  min-height: 32px;
+  z-index: 100;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.status-bar__section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-bar__text {
+  font-size: 11px;
+  color: var(--ss-text-muted);
+  text-transform: capitalize;
+}
+
+/* ============================================================
+   CONNECTION INDICATOR DOT
+   ============================================================ */
+.status-bar__indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-bar__indicator--disconnected {
+  background: var(--ss-text-muted);
+}
+
+.status-bar__indicator--connecting {
+  background: var(--ss-warning);
+  animation: statusbar-pulse 1.5s ease-in-out infinite;
+}
+
+.status-bar__indicator--connected {
+  background: var(--ss-success);
+}
+
+.status-bar__indicator--error {
+  background: var(--ss-error);
+}
+
+@keyframes statusbar-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   RECORDING BADGE
+   ============================================================ */
+.status-bar__recording {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ss-error);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.1);
+  letter-spacing: 1px;
+}
+
+.status-bar__recording-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ss-error);
+  animation: rec-pulse 1s ease-in-out infinite;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   STATS DISPLAY
+   ============================================================ */
+.status-bar__stats {
+  gap: 12px;
+}
+
+.status-bar__stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-bar__stat-label {
+  font-size: 10px;
+  color: var(--ss-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-bar__stat-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ss-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.status-bar__stat-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--ss-border);
+}
+
+/* ============================================================
+   PROVIDER INFO
+   ============================================================ */
+.status-bar__provider {
+  font-size: 10px;
+  color: var(--ss-text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 639px) {
+  .status-bar {
+    padding: 4px 12px;
+  }
+
+  .status-bar__stats {
+    display: none;
+  }
+}

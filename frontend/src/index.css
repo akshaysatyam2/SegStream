@@ -1,0 +1,105 @@
+/**
+ * SegStream Design System — Global Variables & Resets
+ *
+ * Implements a glassmorphism dark theme optimized for a streaming
+ * studio interface. Uses CSS variables for consistent theming.
+ *
+ * @author Akshay Satyam
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Colors */
+  --ss-bg-primary: #0a0a0f;
+  --ss-bg-panel: #12121a;
+  --ss-bg-card: #1a1a2e;
+  
+  --ss-glass-bg: rgba(255, 255, 255, 0.03);
+  --ss-glass-filter: blur(20px);
+  --ss-glass-border: rgba(255, 255, 255, 0.06);
+
+  --ss-accent-primary: #7c3aed;
+  --ss-accent-secondary: #06b6d4;
+
+  --ss-text-primary: #f8fafc;
+  --ss-text-secondary: #94a3b8;
+  --ss-text-muted: #475569;
+
+  --ss-success: #10b981;
+  --ss-warning: #f59e0b;
+  --ss-error: #ef4444;
+
+  /* Typography */
+  --ss-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Borders & Shadows */
+  --ss-radius-card: 12px;
+  --ss-radius-input: 8px;
+  --ss-radius-pill: 20px;
+  
+  --ss-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Light Theme Overrides (if toggled) */
+html[data-theme="light"] {
+  --ss-bg-primary: #f8fafc;
+  --ss-bg-panel: #f1f5f9;
+  --ss-bg-card: #ffffff;
+  
+  --ss-glass-bg: rgba(255, 255, 255, 0.7);
+  --ss-glass-border: rgba(0, 0, 0, 0.1);
+
+  --ss-text-primary: #0f172a;
+  --ss-text-secondary: #475569;
+  --ss-text-muted: #94a3b8;
+
+  --ss-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--ss-font-family);
+  background-color: var(--ss-bg-primary);
+  color: var(--ss-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base interactive resets */
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+input, select {
+  font-family: inherit;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--ss-text-muted);
+  border-radius: var(--ss-radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ss-text-secondary);
+}

@@ -1,0 +1,224 @@
+/**
+ * RecordingControls.css — Recording & Connection Control Bar Styles
+ *
+ * Styles for the bottom control bar: record button with pulsing dot,
+ * timer display, format dropdown, and connect/disconnect button.
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   CONTROLS BAR CONTAINER
+   Horizontal flex layout spanning the full grid width.
+   ============================================================ */
+.recording-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 24px;
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   SECTION GROUPS
+   Each section is a logical group (record, format, connect).
+   ============================================================ */
+.recording-controls__section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ============================================================
+   RECORD BUTTON
+   Large rounded button with a red dot indicator.
+   ============================================================ */
+.recording-controls__record-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: 1px solid var(--ss-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ss-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--ss-font);
+}
+
+.recording-controls__record-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--ss-error);
+}
+
+.recording-controls__record-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Active recording state */
+.recording-controls__record-btn--active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--ss-error);
+  color: var(--ss-error);
+}
+
+/* --- Record dot indicator --- */
+.recording-controls__record-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ss-error);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.recording-controls__record-btn:not(.recording-controls__record-btn--active)
+  .recording-controls__record-dot {
+  background: var(--ss-text-muted);
+}
+
+/* Pulsing animation when recording */
+.recording-controls__record-btn--active .recording-controls__record-dot {
+  animation: record-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+}
+
+/* --- Record label --- */
+.recording-controls__record-label {
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ============================================================
+   RECORDING TIMER
+   Monospace display showing elapsed recording time.
+   ============================================================ */
+.recording-controls__timer {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ss-error);
+  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 1px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* ============================================================
+   FORMAT SELECTOR
+   Styled dropdown for recording output format.
+   ============================================================ */
+.recording-controls__format-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ss-text-secondary);
+}
+
+.recording-controls__format-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--ss-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ss-text-primary);
+  font-size: 13px;
+  font-family: var(--ss-font);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.recording-controls__format-select:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.recording-controls__format-select:focus {
+  border-color: var(--ss-accent);
+}
+
+.recording-controls__format-select option {
+  background: var(--ss-bg-panel);
+  color: var(--ss-text-primary);
+}
+
+/* ============================================================
+   CONNECT / DISCONNECT BUTTON
+   ============================================================ */
+.recording-controls__connect-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--ss-border);
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--ss-accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--ss-font);
+}
+
+.recording-controls__connect-btn:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: var(--ss-accent);
+}
+
+.recording-controls__connect-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Connected state — green */
+.recording-controls__connect-btn--connected {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--ss-success);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.recording-controls__connect-btn--connected:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--ss-error);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Connecting state — pulsing */
+.recording-controls__connect-btn--connecting {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--ss-warning);
+  border-color: rgba(245, 158, 11, 0.3);
+  animation: connect-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes connect-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .recording-controls {
+    padding: 12px 16px;
+    gap: 16px;
+  }
+}

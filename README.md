@@ -119,10 +119,12 @@ python backend/server.py
 **Serve the frontend:**
 
 ```bash
-python -m http.server 3000 --directory frontend
+cd frontend
+npm install
+npm run dev
 ```
 
-Open `http://localhost:3000` — select your screen/window, position the webcam overlay, hit record.
+Open `http://localhost:5173` — select your screen/window, position the webcam overlay, hit record.
 
 ### RTSP Streaming (Optional)
 
@@ -149,10 +151,10 @@ SegStream pushes frames to `rtsp://localhost:8554/segstream`. Use this URL in OB
 
 ## Roadmap
 
-- [ ] Core backend — stream reception, YOLO inference, compositing pipeline
-- [ ] Frontend — screen/webcam capture, drag-and-drop overlay UI
-- [ ] Local recording (MP4 output via OpenCV/FFmpeg)
-- [ ] RTSP streaming support
+- [x] Core backend — stream reception, YOLO inference, compositing pipeline
+- [x] Frontend — screen/webcam capture, drag-and-drop overlay UI
+- [x] Local recording (MP4 output via OpenCV/FFmpeg)
+- [x] RTSP streaming support
 - [ ] Audio capture and sync
 - [ ] Multi-person segmentation
 - [ ] Desktop app wrapper (Electron / Tauri)

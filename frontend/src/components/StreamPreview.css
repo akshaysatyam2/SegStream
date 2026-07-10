@@ -1,0 +1,164 @@
+/**
+ * StreamPreview.css — Stream Preview Panel Styles
+ *
+ * Styles for the main stream preview area, the placeholder state,
+ * and the draggable webcam overlay with shape variants.
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   PREVIEW CONTAINER
+   Relative positioning so the webcam overlay can be absolutely
+   positioned within it. Dark background for the video.
+   ============================================================ */
+.preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: var(--ss-bg-darkest);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--ss-border);
+  box-shadow: var(--ss-shadow);
+}
+
+/* ============================================================
+   SCREEN CAPTURE VIDEO
+   Fills the container while maintaining aspect ratio.
+   ============================================================ */
+.preview__screen {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
+/* ============================================================
+   PLACEHOLDER (No stream active)
+   Centered content with icon and instructions.
+   ============================================================ */
+.preview__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  padding: 40px;
+  text-align: center;
+  gap: 16px;
+}
+
+.preview__placeholder-icon {
+  color: var(--ss-text-muted);
+  opacity: 0.5;
+  animation: placeholder-float 3s ease-in-out infinite;
+}
+
+@keyframes placeholder-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.preview__placeholder-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ss-text-primary);
+  margin: 0;
+}
+
+.preview__placeholder-text {
+  font-size: 14px;
+  color: var(--ss-text-secondary);
+  max-width: 360px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.preview__placeholder-text strong {
+  color: var(--ss-accent);
+}
+
+/* ============================================================
+   WEBCAM OVERLAY
+   Absolutely positioned on top of the screen preview.
+   Draggable via mouse events in the component.
+   ============================================================ */
+.preview__overlay {
+  position: absolute;
+  cursor: grab;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.2s ease;
+  z-index: 10;
+  /* Prevent selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.preview__overlay:hover {
+  border-color: var(--ss-accent);
+  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.3);
+}
+
+.preview__overlay--dragging {
+  cursor: grabbing;
+  border-color: var(--ss-accent);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+}
+
+/* --- Shape variants --- */
+.preview__overlay--rectangle {
+  border-radius: 0;
+}
+
+.preview__overlay--rounded {
+  border-radius: 12px;
+}
+
+.preview__overlay--circle {
+  border-radius: 50%;
+}
+
+/* ============================================================
+   OVERLAY VIDEO
+   Fills the overlay container completely.
+   ============================================================ */
+.preview__overlay-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Mirror the webcam so it feels natural */
+  transform: scaleX(-1);
+}
+
+/* ============================================================
+   OVERLAY DRAG HANDLE
+   Small icon in the corner indicating the overlay is draggable.
+   Only visible on hover.
+   ============================================================ */
+.preview__overlay-handle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.preview__overlay:hover .preview__overlay-handle {
+  opacity: 1;
+}

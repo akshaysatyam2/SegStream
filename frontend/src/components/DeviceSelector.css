@@ -1,0 +1,155 @@
+/**
+ * DeviceSelector.css — Device Selection Panel Styles
+ *
+ * Left sidebar panel listing available cameras and microphones
+ * with capture toggle buttons and device dropdowns.
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   PANEL CONTAINER
+   ============================================================ */
+.device-selector {
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.device-selector__header {
+  padding-bottom: 4px;
+}
+
+.device-selector__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ss-text-primary);
+  margin: 0;
+}
+
+.device-selector__title svg {
+  color: var(--ss-accent);
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.device-selector__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.device-selector__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ss-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   CAPTURE TOGGLE BUTTON
+   ============================================================ */
+.device-selector__capture-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ss-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ss-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--ss-font);
+  width: 100%;
+}
+
+.device-selector__capture-btn:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+/* Active state — green tint */
+.device-selector__capture-btn--active {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--ss-error);
+}
+
+.device-selector__capture-btn--active:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--ss-error);
+}
+
+/* ============================================================
+   SELECT DROPDOWN
+   ============================================================ */
+.device-selector__select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--ss-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ss-text-primary);
+  font-size: 12px;
+  font-family: var(--ss-font);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.device-selector__select:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.device-selector__select:focus {
+  border-color: var(--ss-accent);
+}
+
+.device-selector__select option {
+  background: var(--ss-bg-panel);
+  color: var(--ss-text-primary);
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.device-selector__empty {
+  font-size: 12px;
+  color: var(--ss-text-muted);
+  font-style: italic;
+  margin: 0;
+  padding: 6px 0;
+}
+
+/* ============================================================
+   DEVICE COUNT SUMMARY
+   ============================================================ */
+.device-selector__summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ss-text-muted);
+  padding-top: 4px;
+  border-top: 1px solid var(--ss-border);
+}
+
+.device-selector__summary-dot {
+  opacity: 0.5;
+}
