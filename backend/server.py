@@ -249,11 +249,11 @@ async def _processing_loop() -> None:
         # Throttle to target FPS.
         elapsed = time.monotonic() - t0
         sleep_time = target_interval - elapsed
-        if sleep_time > 0:
+        if sleep_time > 0.1:
             await asyncio.sleep(sleep_time)
         else:
             # If we're behind, yield briefly to keep the event loop responsive.
-            await asyncio.sleep(0)
+            await asyncio.sleep(0.1)
 
 
 def _process_frame_pair(

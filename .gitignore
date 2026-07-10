@@ -9,7 +9,6 @@ venv/
 env/
 
 # ONNX models (download separately)
-models/*.onnx
 models/*.pt
 
 # IDE / editor

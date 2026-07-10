@@ -33,32 +33,64 @@ from aiortc import MediaStreamTrack
 from av import VideoFrame
 
 class ProxyVideoStreamTrack(MediaStreamTrack):
-    """A track that yields frames pushed from the processing loop."""
+    """
+    A track that yields frames pushed from the processing loop.
+    We duplicate the latest frame to maintain exactly 30 FPS for the MP4 encoder,
+    which fixes the unreadable MP4s caused by the YOLO inference running slowly.
+    """
     kind = "video"
     
-    def __init__(self, fps=30):
+    def __init__(self, fps: int = 30) -> None:
         super().__init__()
-        self.queue = asyncio.Queue(maxsize=10)
-        self._pts = 0
         self._fps = fps
+        self._pts = 0
+        self._latest_frame: np.ndarray | None = None
+        self._first_frame_event = asyncio.Event()
+        self._start_time = None
 
     async def recv(self) -> VideoFrame:
-        frame_array = await self.queue.get()
+        if self._latest_frame is None:
+            await self._first_frame_event.wait()
+            self._start_time = time.time()
+            
+        # Critical: ALWAYS yield to the event loop so we don't lock the WebRTC connection!
+        await asyncio.sleep(0)
+        
+        now = time.time() - self._start_time
+        expected_pts = int(now * self._fps)
+        
+        if self._pts > expected_pts:
+            # We are ahead of schedule, sleep until it's time
+            sleep_time = (self._pts / self._fps) - now
+            if sleep_time > 0:
+                await asyncio.sleep(sleep_time)
+
+        frame_array = self._latest_frame.copy()
         vf = VideoFrame.from_ndarray(frame_array, format="bgr24")
         vf.pts = self._pts
         vf.time_base = fractions.Fraction(1, self._fps)
         self._pts += 1
         return vf
 
+    def update_frame(self, frame: np.ndarray) -> None:
+        self._latest_frame = frame
+        if not self._first_frame_event.is_set():
+            self._first_frame_event.set()
+
 class VideoRecorder:
     def __init__(self, config: SegStreamConfig) -> None:
         self._config = config
-        self._media_recorder: Optional[MediaRecorder] = None
-        self._proxy_track: Optional[ProxyVideoStreamTrack] = None
-        self._output_path: Optional[str] = None
-        self.is_recording: bool = False
+        self._media_recorder: MediaRecorder | None = None
+        self._proxy_track: ProxyVideoStreamTrack | None = None
+        self.is_recording = False
+        self._frame_count = 0
+        self._output_path = ""
         self._start_time: Optional[float] = None
-        self._frame_count: int = 0
+
+    def write_frame(self, frame: np.ndarray) -> None:
+        if self.is_recording and self._proxy_track:
+            self._proxy_track.update_frame(frame)
+            self._frame_count += 1
 
     async def start_async(self, width: int, height: int, audio_track: Optional[MediaStreamTrack] = None) -> str:
         if self.is_recording:
@@ -85,13 +117,6 @@ class VideoRecorder:
         logger.info("Recording started (with audio) → %s", self._output_path)
         return self._output_path
 
-    def write_frame(self, frame: np.ndarray) -> None:
-        if self.is_recording and self._proxy_track:
-            try:
-                self._proxy_track.queue.put_nowait(frame)
-                self._frame_count += 1
-            except asyncio.QueueFull:
-                pass
 
     async def stop_async(self) -> str:
         if not self.is_recording or self._media_recorder is None:
