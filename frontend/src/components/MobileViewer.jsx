@@ -102,11 +102,11 @@ function MobileViewer({ mediaCapture, webrtc }) {
         </div>
 
         <button
-          className={`mobile-viewer__btn ${isConnected ? 'mobile-viewer__btn--danger' : 'mobile-viewer__btn--primary'}`}
-          onClick={handleConnect}
-          disabled={isConnecting}
+          className="mobile-viewer__btn mobile-viewer__btn--primary"
+          disabled={true}
+          style={{ cursor: 'default' }}
         >
-          {isConnected ? 'Disconnect' : isConnecting ? 'Connecting…' : 'Connect to Backend'}
+          {isConnected ? 'Connected (Auto)' : isConnecting ? 'Connecting…' : 'Disconnected'}
         </button>
       </div>
 

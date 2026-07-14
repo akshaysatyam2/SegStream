@@ -143,8 +143,8 @@ function RecordingControls({ webrtc }) {
                 ? 'recording-controls__connect-btn--connecting'
                 : ''
           }`}
-          onClick={handleConnect}
-          disabled={isConnecting}
+          disabled={true}
+          style={{ cursor: 'default' }}
         >
           {/* Connection icon */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -164,10 +164,10 @@ function RecordingControls({ webrtc }) {
           </svg>
           <span>
             {isConnected
-              ? 'Disconnect'
+              ? 'Connected (Auto)'
               : isConnecting
                 ? 'Connecting…'
-                : 'Connect'}
+                : 'Disconnected'}
           </span>
         </button>
       </div>

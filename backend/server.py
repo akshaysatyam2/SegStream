@@ -113,15 +113,37 @@ async def offer_handler(request: web.Request) -> web.Response:
     pc = RTCPeerConnection()
     peer_connections.add(pc)
 
+    global _track_counter, _track_counter_lock
+    async with _track_counter_lock:
+        _track_counter = 0
+
     logger.info("New WebRTC offer received (total peers: %d)", len(peer_connections))
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange() -> None:
         state = pc.connectionState
         logger.info("Peer connection state → %s", state)
-        if state in ("failed", "closed"):
+        if state in ("failed", "closed", "disconnected"):
             await pc.close()
             peer_connections.discard(pc)
+            if not peer_connections:
+                logger.info("No active connections. Stopping recording and streaming.")
+                if recorder.is_recording:
+                    try:
+                        await recorder.stop_async()
+                    except Exception as e:
+                        logger.error("Failed to stop recording: %s", e)
+                if streamer.is_streaming:
+                    try:
+                        streamer.stop()
+                    except Exception as e:
+                        logger.error("Failed to stop streaming: %s", e)
+                
+                async with _frame_lock:
+                    global _latest_screen_frame, _latest_webcam_frame, _audio_track
+                    _latest_screen_frame = None
+                    _latest_webcam_frame = None
+                    _audio_track = None
 
     @pc.on("track")
     def on_track(track: MediaStreamTrack) -> None:

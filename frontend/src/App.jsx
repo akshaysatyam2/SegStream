@@ -101,6 +101,47 @@ export default function App() {
   }, [mediaCapture.webcamStream, dispatch]);
 
   /**
+   * Auto-connect and auto-reconnect logic.
+   * If disconnected or error, retry connection after 2 seconds.
+   */
+  useEffect(() => {
+    let timer;
+    if (webrtc.connectionStatus === 'disconnected' || webrtc.connectionStatus === 'error') {
+      timer = setTimeout(() => {
+        webrtc.connect(mediaCapture.screenStream, mediaCapture.webcamStream, state.settings.backendUrl);
+      }, 2000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [webrtc.connectionStatus, webrtc, mediaCapture.screenStream, mediaCapture.webcamStream, state.settings.backendUrl]);
+
+  /**
+   * Disconnect when streams change to force a renegotiation via auto-reconnect.
+   */
+  const prevStreamsRef = useRef({ screen: mediaCapture.screenStream, webcam: mediaCapture.webcamStream });
+  useEffect(() => {
+    if (
+      prevStreamsRef.current.screen !== mediaCapture.screenStream ||
+      prevStreamsRef.current.webcam !== mediaCapture.webcamStream
+    ) {
+      if (webrtc.connectionStatus === 'connected' || webrtc.connectionStatus === 'connecting') {
+        webrtc.disconnect();
+      }
+      prevStreamsRef.current = { screen: mediaCapture.screenStream, webcam: mediaCapture.webcamStream };
+    }
+  }, [mediaCapture.screenStream, mediaCapture.webcamStream, webrtc]);
+
+  /**
+   * Auto-stop recording if connection is lost.
+   */
+  useEffect(() => {
+    if (webrtc.connectionStatus !== 'connected' && state.isRecording) {
+      dispatch({ type: 'SET_RECORDING', payload: false });
+    }
+  }, [webrtc.connectionStatus, state.isRecording, dispatch]);
+
+  /**
    * Trigger backend recording APIs when state.isRecording toggles.
    * Alerts the user with the saved file path upon stopping.
    */

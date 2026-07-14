@@ -232,25 +232,32 @@ export function useWebRTC(dispatch) {
           }
         });
 
-        /* --- Add media tracks to the connection --- */
-
-        /* Add screen capture tracks */
-        if (screenStream) {
-          screenStream.getTracks().forEach((track) => {
-            pc.addTrack(track, screenStream);
-          });
-        }
-
-        /* Add webcam tracks */
-        if (webcamStream) {
-          webcamStream.getTracks().forEach((track) => {
-            pc.addTrack(track, webcamStream);
-          });
-        }
-
-        /* If no tracks were added, add a transceiver so the offer is valid */
-        if (!screenStream && !webcamStream) {
+        /* --- Add media tracks using transceivers to guarantee order --- */
+        
+        // 1. Screen Video (always first)
+        const screenVideoTrack = screenStream?.getVideoTracks()[0];
+        if (screenVideoTrack) {
+          pc.addTransceiver(screenVideoTrack, { direction: 'sendonly' });
+        } else {
           pc.addTransceiver('video', { direction: 'sendonly' });
+        }
+
+        // 2. Webcam Video (always second)
+        const webcamVideoTrack = webcamStream?.getVideoTracks()[0];
+        if (webcamVideoTrack) {
+          pc.addTransceiver(webcamVideoTrack, { direction: 'sendonly' });
+        } else {
+          pc.addTransceiver('video', { direction: 'sendonly' });
+        }
+
+        // 3. Audio (from screen or webcam)
+        const audioTracks = [
+          ...(screenStream?.getAudioTracks() || []),
+          ...(webcamStream?.getAudioTracks() || [])
+        ];
+        if (audioTracks.length > 0) {
+          pc.addTransceiver(audioTracks[0], { direction: 'sendonly' });
+        } else {
           pc.addTransceiver('audio', { direction: 'sendonly' });
         }
 
