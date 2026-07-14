@@ -146,6 +146,16 @@ export default function App() {
    * Draws screen stream and segmented webcam to a hidden canvas for recording.
    */
   const masterCanvasRef = useRef(null);
+  const screenVideoRef = useRef(null);
+
+  // Keep latest state in refs so the loop can read them without stale closures or dependency re-renders
+  const latestStateRef = useRef(state);
+  const latestWebrtcRef = useRef(webrtc);
+  useEffect(() => {
+    latestStateRef.current = state;
+    latestWebrtcRef.current = webrtc;
+  }, [state, webrtc]);
+
   useEffect(() => {
     if (!masterCanvasRef.current) {
       masterCanvasRef.current = document.createElement('canvas');
@@ -153,16 +163,27 @@ export default function App() {
     const canvas = masterCanvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    const screenVideo = document.createElement('video');
-    screenVideo.autoplay = true;
-    screenVideo.playsInline = true;
-    screenVideo.muted = true;
-    if (state.screenStream) screenVideo.srcObject = state.screenStream;
-    else screenVideo.srcObject = null;
+    if (!screenVideoRef.current) {
+      screenVideoRef.current = document.createElement('video');
+      screenVideoRef.current.autoplay = true;
+      screenVideoRef.current.playsInline = true;
+      screenVideoRef.current.muted = true;
+    }
+    const screenVideo = screenVideoRef.current;
+    
+    if (state.screenStream) {
+      screenVideo.srcObject = state.screenStream;
+      screenVideo.play().catch(e => console.error("Screen video play failed", e));
+    } else {
+      screenVideo.srcObject = null;
+    }
 
     let isCompositing = true;
     const loop = () => {
       if (!isCompositing) return;
+      const currentState = latestStateRef.current;
+      const currentWebrtc = latestWebrtcRef.current;
+
       if (screenVideo.readyState >= 2) {
         canvas.width = screenVideo.videoWidth;
         canvas.height = screenVideo.videoHeight;
@@ -170,10 +191,10 @@ export default function App() {
 
         // Draw segmented webcam overlay if available
         if (
-          webrtc.segmentedImgRef &&
-          webrtc.segmentedImgRef.current &&
-          webrtc.segmentedImgRef.current.complete &&
-          webrtc.segmentedImgRef.current.naturalWidth > 0
+          currentWebrtc.segmentedImgRef &&
+          currentWebrtc.segmentedImgRef.current &&
+          currentWebrtc.segmentedImgRef.current.complete &&
+          currentWebrtc.segmentedImgRef.current.naturalWidth > 0
         ) {
           // Helper to emulate object-fit: cover
           const drawImageCover = (ctx, img, x, y, w, h) => {
@@ -195,15 +216,15 @@ export default function App() {
           };
 
           // Map overlay UI coordinates to native canvas coordinates
-          const overlay = state.overlay;
+          const overlay = currentState.overlay;
           let mappedX = overlay.x;
           let mappedY = overlay.y;
           let mappedW = overlay.width;
           let mappedH = overlay.height;
 
-          if (state.previewRect) {
-             const uiW = state.previewRect.width;
-             const uiH = state.previewRect.height;
+          if (currentState.previewRect) {
+             const uiW = currentState.previewRect.width;
+             const uiH = currentState.previewRect.height;
              const vidW = canvas.width;
              const vidH = canvas.height;
              
@@ -240,17 +261,17 @@ export default function App() {
              ctx.beginPath();
              ctx.arc(mappedX + mappedW/2, mappedY + mappedH/2, Math.min(mappedW, mappedH)/2, 0, Math.PI * 2);
              ctx.clip();
-             drawImageCover(ctx, webrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
+             drawImageCover(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
              ctx.restore();
           } else if (overlay.shape === 'rounded') {
              ctx.save();
              ctx.beginPath();
              ctx.roundRect(mappedX, mappedY, mappedW, mappedH, 16);
              ctx.clip();
-             drawImageCover(ctx, webrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
+             drawImageCover(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
              ctx.restore();
           } else {
-             drawImageCover(ctx, webrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
+             drawImageCover(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
           }
           ctx.globalAlpha = 1.0;
         }

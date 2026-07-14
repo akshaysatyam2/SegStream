@@ -24,11 +24,11 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
   background: var(--ss-bg-primary);
   color: var(--ss-text-primary);
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .app__main {
@@ -36,8 +36,8 @@
   display: flex;
   padding: 16px;
   gap: 16px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0; /* Prevents flex children from blowing out the container height */
+  overflow: hidden;
 }
 
 /* ============================================================

@@ -62,6 +62,7 @@ export function useWebRTC(dispatch) {
 
           if (webcamStream) {
             videoRef.current.srcObject = webcamStream;
+            videoRef.current.play().catch(e => console.error("Webcam play failed", e));
           } else {
             videoRef.current.srcObject = null;
           }
