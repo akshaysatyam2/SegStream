@@ -142,28 +142,117 @@ export default function App() {
   }, [webrtc.connectionStatus, state.isRecording, dispatch]);
 
   /**
-   * Trigger backend recording APIs when state.isRecording toggles.
-   * Alerts the user with the saved file path upon stopping.
+   * Local frontend compositing loop.
+   * Draws screen stream and segmented webcam to a hidden canvas for recording.
    */
-  const prevIsRecording = useRef(state.isRecording);
+  const masterCanvasRef = useRef(null);
   useEffect(() => {
-    if (state.isRecording && !prevIsRecording.current) {
-      // Started recording
-      fetch(`${state.settings.backendUrl}/api/recording/start`, { method: 'POST' })
-        .catch(err => console.error('[App] Failed to start recording:', err));
-    } else if (!state.isRecording && prevIsRecording.current) {
-      // Stopped recording
-      fetch(`${state.settings.backendUrl}/api/recording/stop`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-          if (data.path) {
-            alert(`Recording successfully saved to:\n${data.path}`);
-          }
-        })
-        .catch(err => console.error('[App] Failed to stop recording:', err));
+    if (!masterCanvasRef.current) {
+      masterCanvasRef.current = document.createElement('canvas');
     }
-    prevIsRecording.current = state.isRecording;
-  }, [state.isRecording, state.settings.backendUrl]);
+    const canvas = masterCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    const screenVideo = document.createElement('video');
+    screenVideo.autoplay = true;
+    screenVideo.playsInline = true;
+    screenVideo.muted = true;
+    if (state.screenStream) screenVideo.srcObject = state.screenStream;
+    else screenVideo.srcObject = null;
+
+    let isCompositing = true;
+    const loop = () => {
+      if (!isCompositing) return;
+      if (screenVideo.readyState >= 2) {
+        canvas.width = screenVideo.videoWidth;
+        canvas.height = screenVideo.videoHeight;
+        ctx.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+
+        // Draw segmented webcam overlay if available
+        if (
+          webrtc.segmentedImgRef &&
+          webrtc.segmentedImgRef.current &&
+          webrtc.segmentedImgRef.current.complete &&
+          webrtc.segmentedImgRef.current.naturalWidth > 0
+        ) {
+          const overlay = state.overlay;
+          ctx.globalAlpha = overlay.opacity;
+          // Render based on shape
+          if (overlay.shape === 'circle') {
+             ctx.save();
+             ctx.beginPath();
+             ctx.arc(overlay.x + overlay.width/2, overlay.y + overlay.height/2, Math.min(overlay.width, overlay.height)/2, 0, Math.PI * 2);
+             ctx.clip();
+             ctx.drawImage(webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             ctx.restore();
+          } else if (overlay.shape === 'rounded') {
+             ctx.save();
+             ctx.beginPath();
+             ctx.roundRect(overlay.x, overlay.y, overlay.width, overlay.height, 16);
+             ctx.clip();
+             ctx.drawImage(webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             ctx.restore();
+          } else {
+             ctx.drawImage(webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+          }
+          ctx.globalAlpha = 1.0;
+        }
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+
+    return () => { isCompositing = false; };
+  }, [state.screenStream, state.overlay, webrtc]);
+
+  /**
+   * Handle local recording using MediaRecorder and the master canvas stream.
+   */
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+
+  useEffect(() => {
+    if (state.isRecording && !mediaRecorderRef.current) {
+      const canvas = masterCanvasRef.current;
+      const stream = canvas.captureStream(30); // 30 FPS
+
+      // Add audio tracks
+      if (state.screenStream) {
+        state.screenStream.getAudioTracks().forEach(t => stream.addTrack(t));
+      }
+      if (state.webcamStream) {
+        state.webcamStream.getAudioTracks().forEach(t => stream.addTrack(t));
+      }
+
+      const options = { mimeType: 'video/webm; codecs=vp9' };
+      const recorder = new MediaRecorder(stream, options);
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          recordedChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+        recordedChunksRef.current = [];
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `segstream_${Date.now()}.webm`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      };
+
+      recorder.start(1000);
+      mediaRecorderRef.current = recorder;
+    } else if (!state.isRecording && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
+  }, [state.isRecording, state.screenStream, state.webcamStream]);
 
   /**
    * Sync webcam overlay position, size, and shape to the backend.
@@ -210,7 +299,7 @@ export default function App() {
 
             {/* Center — the main event: live stream preview */}
             <section className="studio-layout__preview">
-              <StreamPreview />
+              <StreamPreview webrtc={webrtc} />
             </section>
 
             {/* Right panel — output and streaming settings */}

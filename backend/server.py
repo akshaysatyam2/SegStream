@@ -88,6 +88,30 @@ _processing_task: asyncio.Task | None = None
 # ║  WebRTC Signaling                                                     ║
 # ╚═════════════════════════════════════════════════════════════════════════╝
 
+async def ws_segment_handler(request: web.Request) -> web.WebSocketResponse:
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+    logger.info("Segmentation WebSocket connected.")
+    
+    async for msg in ws:
+        if msg.type == web.WSMsgType.BINARY:
+            try:
+                np_arr = np.frombuffer(msg.data, np.uint8)
+                frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                if frame is not None:
+                    person_rgba, _ = await asyncio.get_event_loop().run_in_executor(
+                        None, segmenter.extract_person, frame
+                    )
+                    _, png_data = cv2.imencode('.png', person_rgba)
+                    await ws.send_bytes(png_data.tobytes())
+            except Exception as e:
+                logger.error(f"WS error: {e}")
+        elif msg.type == web.WSMsgType.ERROR:
+            logger.error(f"WS closed with exception {ws.exception()}")
+            
+    logger.info("Segmentation WebSocket disconnected.")
+    return ws
+
 async def offer_handler(request: web.Request) -> web.Response:
     """Handle a WebRTC SDP offer from the browser.
 
@@ -513,6 +537,7 @@ def create_app(cfg: SegStreamConfig | None = None) -> web.Application:
     app["config"] = cfg
 
     # Register routes.
+    app.router.add_get("/ws/segment", ws_segment_handler)
     app.router.add_post("/offer", offer_handler)
     app.router.add_get("/api/status", status_handler)
     app.router.add_post("/api/config", config_handler)

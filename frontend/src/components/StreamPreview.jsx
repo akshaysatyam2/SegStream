@@ -19,13 +19,14 @@ import { useRef, useEffect, useCallback, useState, memo } from 'react';
 import { useStream } from '../context/StreamContext.jsx';
 import './StreamPreview.css';
 
-function StreamPreview() {
+function StreamPreview({ webrtc }) {
   const { state, dispatch } = useStream();
   const { screenStream, webcamStream, overlay } = state;
 
   /* Refs for video elements */
   const screenVideoRef = useRef(null);
   const webcamVideoRef = useRef(null);
+  const webcamImgRef = useRef(null);
   const previewContainerRef = useRef(null);
 
   /* Drag state — using refs for performance (no re-render during drag) */
@@ -48,6 +49,28 @@ function StreamPreview() {
       webcamVideoRef.current.srcObject = webcamStream || null;
     }
   }, [webcamStream]);
+
+  /* Loop to paint segmented frames to the UI */
+  useEffect(() => {
+    let isRunning = true;
+    const loop = () => {
+      if (!isRunning) return;
+      if (
+        webrtc &&
+        webrtc.connectionStatus === 'connected' &&
+        webrtc.segmentedImgRef &&
+        webrtc.segmentedImgRef.current &&
+        webcamImgRef.current
+      ) {
+        if (webcamImgRef.current.src !== webrtc.segmentedImgRef.current.src) {
+          webcamImgRef.current.src = webrtc.segmentedImgRef.current.src;
+        }
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    return () => { isRunning = false; };
+  }, [webrtc]);
 
   /* ============================================================
      DRAG-AND-DROP FOR WEBCAM OVERLAY
@@ -172,13 +195,21 @@ function StreamPreview() {
           onMouseDown={handleMouseDown}
           title="Drag to reposition webcam overlay"
         >
-          <video
-            ref={webcamVideoRef}
-            className="preview__overlay-video"
-            autoPlay
-            playsInline
-            muted
-          />
+          {webrtc?.connectionStatus === 'connected' ? (
+            <img
+              ref={webcamImgRef}
+              className="preview__overlay-video"
+              alt="Segmented overlay"
+            />
+          ) : (
+            <video
+              ref={webcamVideoRef}
+              className="preview__overlay-video"
+              autoPlay
+              playsInline
+              muted
+            />
+          )}
           {/* Drag handle indicator */}
           <div className="preview__overlay-handle">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
