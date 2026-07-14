@@ -194,25 +194,63 @@ export default function App() {
              ctx.drawImage(img, x + offsetX, y + offsetY, renderW, renderH);
           };
 
+          // Map overlay UI coordinates to native canvas coordinates
           const overlay = state.overlay;
+          let mappedX = overlay.x;
+          let mappedY = overlay.y;
+          let mappedW = overlay.width;
+          let mappedH = overlay.height;
+
+          if (state.previewRect) {
+             const uiW = state.previewRect.width;
+             const uiH = state.previewRect.height;
+             const vidW = canvas.width;
+             const vidH = canvas.height;
+             
+             if (uiW > 0 && uiH > 0 && vidW > 0 && vidH > 0) {
+                const uiRatio = uiW / uiH;
+                const vidRatio = vidW / vidH;
+                
+                let uiRenderW, uiRenderH, uiRenderX, uiRenderY;
+                
+                if (uiRatio > vidRatio) {
+                   uiRenderH = uiH;
+                   uiRenderW = uiH * vidRatio;
+                   uiRenderX = (uiW - uiRenderW) / 2;
+                   uiRenderY = 0;
+                } else {
+                   uiRenderW = uiW;
+                   uiRenderH = uiW / vidRatio;
+                   uiRenderX = 0;
+                   uiRenderY = (uiH - uiRenderH) / 2;
+                }
+                
+                const scale = vidW / uiRenderW;
+                mappedX = (overlay.x - uiRenderX) * scale;
+                mappedY = (overlay.y - uiRenderY) * scale;
+                mappedW = overlay.width * scale;
+                mappedH = overlay.height * scale;
+             }
+          }
+
           ctx.globalAlpha = overlay.opacity;
           // Render based on shape
           if (overlay.shape === 'circle') {
              ctx.save();
              ctx.beginPath();
-             ctx.arc(overlay.x + overlay.width/2, overlay.y + overlay.height/2, Math.min(overlay.width, overlay.height)/2, 0, Math.PI * 2);
+             ctx.arc(mappedX + mappedW/2, mappedY + mappedH/2, Math.min(mappedW, mappedH)/2, 0, Math.PI * 2);
              ctx.clip();
-             drawImageCover(ctx, webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             drawImageCover(ctx, webrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
              ctx.restore();
           } else if (overlay.shape === 'rounded') {
              ctx.save();
              ctx.beginPath();
-             ctx.roundRect(overlay.x, overlay.y, overlay.width, overlay.height, 16);
+             ctx.roundRect(mappedX, mappedY, mappedW, mappedH, 16);
              ctx.clip();
-             drawImageCover(ctx, webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             drawImageCover(ctx, webrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
              ctx.restore();
           } else {
-             drawImageCover(ctx, webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             drawImageCover(ctx, webrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
           }
           ctx.globalAlpha = 1.0;
         }

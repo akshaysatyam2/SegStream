@@ -73,6 +73,27 @@ function StreamPreview({ webrtc }) {
   }, [webrtc]);
 
   /* ============================================================
+     TRACK PREVIEW CONTAINER SIZE
+     ============================================================ */
+  useEffect(() => {
+    const container = previewContainerRef.current;
+    if (!container) return;
+    
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      if (rect.width > 0 && rect.height > 0) {
+        dispatch({
+          type: 'SET_PREVIEW_RECT',
+          payload: { width: rect.width, height: rect.height },
+        });
+      }
+    });
+    
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [dispatch]);
+
+  /* ============================================================
      DRAG-AND-DROP FOR WEBCAM OVERLAY
      Mouse event handlers for repositioning the overlay.
      Uses mousemove on the document so dragging continues even

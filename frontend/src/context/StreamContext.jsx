@@ -64,6 +64,12 @@ const initialState = {
     bitrate: 0,   // kbps
   },
 
+  /* --- UI State --- */
+  previewRect: {
+    width: 800,
+    height: 450,
+  },
+
   /* --- User Settings --- */
   settings: {
     resolution: { width: 1920, height: 1080 },
@@ -113,6 +119,10 @@ function streamReducer(state, action) {
           ...initialState.overlay,
         },
       };
+
+    /* --- UI Actions --- */
+    case 'SET_PREVIEW_RECT':
+      return { ...state, previewRect: action.payload };
 
     /* --- Stats Actions --- */
     case 'UPDATE_STATS':
