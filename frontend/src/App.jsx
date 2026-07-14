@@ -208,12 +208,13 @@ export default function App() {
         if (
           currentWebrtc.segmentedImgRef &&
           currentWebrtc.segmentedImgRef.current &&
-          currentWebrtc.segmentedImgRef.current.complete &&
-          currentWebrtc.segmentedImgRef.current.naturalWidth > 0
+          currentWebrtc.segmentedImgRef.current.width > 0
         ) {
           // Helper to emulate object-fit: cover
           const drawImageCover = (ctx, img, x, y, w, h) => {
-             const imgRatio = img.naturalWidth / img.naturalHeight;
+             const imgW = img.width || img.naturalWidth;
+             const imgH = img.height || img.naturalHeight;
+             const imgRatio = imgW / imgH;
              const boxRatio = w / h;
              let renderW, renderH, offsetX, offsetY;
              if (imgRatio > boxRatio) {

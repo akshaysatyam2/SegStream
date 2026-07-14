@@ -19,12 +19,14 @@
   --ss-glass-filter: blur(20px);
   --ss-glass-border: rgba(255, 255, 255, 0.05);
 
+  --ss-accent: #f97316; /* legacy variable mapping for components */
   --ss-accent-primary: #f97316; /* bg-orange-500 (Primary/Highlights) */
   --ss-accent-secondary: #fb923c; /* bg-orange-400 (Hover states) */
 
   --ss-text-primary: #f9fafb; /* text-gray-50 */
   --ss-text-secondary: #d1d5db; /* text-gray-300 */
   --ss-text-muted: #9ca3af; /* text-gray-400 */
+  --ss-border: rgba(255, 255, 255, 0.15); /* legacy variable mapping */
 
   --ss-success: #10b981;
   --ss-warning: #f59e0b;

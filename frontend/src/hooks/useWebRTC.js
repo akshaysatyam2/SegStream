@@ -142,15 +142,21 @@ export function useWebRTC(dispatch) {
           setTimeout(loop, 33);
         };
 
-        ws.onmessage = (event) => {
+        ws.onmessage = async (event) => {
           waitingForResponseRef.current = false;
           // event.data is Blob
           if (event.data instanceof Blob) {
-            const imageUrl = URL.createObjectURL(event.data);
-            if (segmentedImgRef.current.src) {
-              URL.revokeObjectURL(segmentedImgRef.current.src);
+            try {
+              const bitmap = await createImageBitmap(event.data);
+              // Clean up the old bitmap if it exists
+              if (segmentedImgRef.current && segmentedImgRef.current.close) {
+                segmentedImgRef.current.close();
+              }
+              // Store the new bitmap for the renderer
+              segmentedImgRef.current = bitmap;
+            } catch (err) {
+              console.error('[useWebRTC] Failed to decode frame:', err);
             }
-            segmentedImgRef.current.src = imageUrl;
           }
         };
 
