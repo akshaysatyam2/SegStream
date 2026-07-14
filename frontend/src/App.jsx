@@ -175,6 +175,25 @@ export default function App() {
           webrtc.segmentedImgRef.current.complete &&
           webrtc.segmentedImgRef.current.naturalWidth > 0
         ) {
+          // Helper to emulate object-fit: cover
+          const drawImageCover = (ctx, img, x, y, w, h) => {
+             const imgRatio = img.naturalWidth / img.naturalHeight;
+             const boxRatio = w / h;
+             let renderW, renderH, offsetX, offsetY;
+             if (imgRatio > boxRatio) {
+                renderH = h;
+                renderW = h * imgRatio;
+                offsetX = (w - renderW) / 2;
+                offsetY = 0;
+             } else {
+                renderW = w;
+                renderH = w / imgRatio;
+                offsetX = 0;
+                offsetY = (h - renderH) / 2;
+             }
+             ctx.drawImage(img, x + offsetX, y + offsetY, renderW, renderH);
+          };
+
           const overlay = state.overlay;
           ctx.globalAlpha = overlay.opacity;
           // Render based on shape
@@ -183,17 +202,17 @@ export default function App() {
              ctx.beginPath();
              ctx.arc(overlay.x + overlay.width/2, overlay.y + overlay.height/2, Math.min(overlay.width, overlay.height)/2, 0, Math.PI * 2);
              ctx.clip();
-             ctx.drawImage(webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             drawImageCover(ctx, webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
              ctx.restore();
           } else if (overlay.shape === 'rounded') {
              ctx.save();
              ctx.beginPath();
              ctx.roundRect(overlay.x, overlay.y, overlay.width, overlay.height, 16);
              ctx.clip();
-             ctx.drawImage(webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             drawImageCover(ctx, webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
              ctx.restore();
           } else {
-             ctx.drawImage(webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
+             drawImageCover(ctx, webrtc.segmentedImgRef.current, overlay.x, overlay.y, overlay.width, overlay.height);
           }
           ctx.globalAlpha = 1.0;
         }
@@ -202,7 +221,10 @@ export default function App() {
     };
     requestAnimationFrame(loop);
 
-    return () => { isCompositing = false; };
+    return () => { 
+      isCompositing = false; 
+      screenVideo.srcObject = null;
+    };
   }, [state.screenStream, state.overlay, webrtc]);
 
   /**
@@ -224,8 +246,18 @@ export default function App() {
         state.webcamStream.getAudioTracks().forEach(t => stream.addTrack(t));
       }
 
-      const options = { mimeType: 'video/webm; codecs=vp9' };
-      const recorder = new MediaRecorder(stream, options);
+      let recorder;
+      try {
+        const options = { mimeType: 'video/webm; codecs=vp9' };
+        recorder = new MediaRecorder(stream, options);
+      } catch (e) {
+        console.warn('VP9 not supported, falling back to default codecs', e);
+        try {
+          recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        } catch (e2) {
+          recorder = new MediaRecorder(stream);
+        }
+      }
 
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {

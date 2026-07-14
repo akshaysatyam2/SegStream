@@ -92,10 +92,20 @@ export function useWebRTC(dispatch) {
               const vh = videoRef.current.videoHeight;
               
               if (vw > 0 && vh > 0) {
-                if (canvasRef.current.width !== vw) canvasRef.current.width = vw;
-                if (canvasRef.current.height !== vh) canvasRef.current.height = vh;
+                // Force YOLO native input size to avoid backend squishing
+                const targetSize = 640;
+                if (canvasRef.current.width !== targetSize) canvasRef.current.width = targetSize;
+                if (canvasRef.current.height !== targetSize) canvasRef.current.height = targetSize;
 
-                ctx.drawImage(videoRef.current, 0, 0, vw, vh);
+                // Letterbox: pad with YOLO standard grey
+                ctx.fillStyle = '#727272';
+                ctx.fillRect(0, 0, targetSize, targetSize);
+
+                const scale = Math.min(targetSize / vw, targetSize / vh);
+                const dw = targetSize - vw * scale;
+                const dh = targetSize - vh * scale;
+                
+                ctx.drawImage(videoRef.current, dw / 2, dh / 2, vw * scale, vh * scale);
 
                 waitingForResponseRef.current = true;
                 canvasRef.current.toBlob(
