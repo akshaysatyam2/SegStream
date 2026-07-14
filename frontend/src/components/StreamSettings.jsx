@@ -81,6 +81,15 @@ function StreamSettings({ webrtc }) {
       r.height === settings.resolution.height
   );
 
+  const handlePaddingChange = (side, value) => {
+    dispatch({
+      type: 'UPDATE_SETTINGS',
+      payload: { 
+        padding: { ...(settings.padding || {}), [side]: parseInt(value) } 
+      }
+    });
+  };
+
   return (
     <div className="stream-settings">
       {/* Panel header */}
@@ -147,24 +156,25 @@ function StreamSettings({ webrtc }) {
         </select>
       </div>
 
-      {/* --- Layout Padding --- */}
-      <div className="stream-settings__group">
-        <label className="stream-settings__label">
-          Sidebar Padding (px)
-          <span className="stream-settings__value">{settings.paddingRight || 0}px</span>
-        </label>
-        <input
-          type="range"
-          className="stream-settings__slider"
-          min="0"
-          max="800"
-          step="50"
-          value={settings.paddingRight || 0}
-          onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { paddingRight: Number(e.target.value) } })}
-        />
-        <div className="stream-settings__slider-labels">
-          <span>0px</span>
-          <span>800px</span>
+      {/* --- Padding Controls --- */}
+      <div className="stream-settings__section">
+        <label className="stream-settings__label">Canvas Padding (px)</label>
+        <div className="stream-settings__padding-grid">
+          {['top', 'bottom', 'left', 'right'].map((side) => (
+            <div key={side} className="stream-settings__padding-input">
+              <span className="stream-settings__padding-label">{side.charAt(0).toUpperCase() + side.slice(1)}</span>
+              <input
+                type="range"
+                min="0"
+                max="500"
+                step="10"
+                value={settings.padding?.[side] || 0}
+                onChange={(e) => handlePaddingChange(side, e.target.value)}
+                className="stream-settings__range"
+              />
+              <span className="stream-settings__value">{settings.padding?.[side] || 0}px</span>
+            </div>
+          ))}
         </div>
       </div>
 

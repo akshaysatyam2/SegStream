@@ -258,3 +258,20 @@
 .stream-settings__info-value--disconnected {
   color: var(--ss-text-muted);
 }
+
+.stream-settings__padding-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+.stream-settings__padding-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stream-settings__padding-label {
+  font-size: 0.75rem;
+  color: var(--ss-text-muted);
+}
+

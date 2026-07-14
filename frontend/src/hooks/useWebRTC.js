@@ -60,11 +60,11 @@ export function useWebRTC(dispatch) {
             videoRef.current.muted = true;
           }
 
-          if (webcamStream) {
-            videoRef.current.srcObject = webcamStream;
-            videoRef.current.play().catch(e => console.error("Webcam play failed", e));
-          } else {
-            videoRef.current.srcObject = null;
+          if (videoRef.current.srcObject !== webcamStream) {
+            videoRef.current.srcObject = webcamStream || null;
+            if (webcamStream) {
+              videoRef.current.play().catch(e => console.error("Webcam play failed", e));
+            }
           }
 
           const ctx = canvasRef.current.getContext('2d');

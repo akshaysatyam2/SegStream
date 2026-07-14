@@ -175,11 +175,11 @@ export default function App() {
     }
     const screenVideo = screenVideoRef.current;
     
-    if (state.screenStream) {
-      screenVideo.srcObject = state.screenStream;
-      screenVideo.play().catch(e => console.error("Screen video play failed", e));
-    } else {
-      screenVideo.srcObject = null;
+    if (screenVideo.srcObject !== state.screenStream) {
+      screenVideo.srcObject = state.screenStream || null;
+      if (state.screenStream) {
+        screenVideo.play().catch(e => console.error("Screen video play failed", e));
+      }
     }
 
     let isCompositing = true;
@@ -188,21 +188,24 @@ export default function App() {
       const currentState = latestStateRef.current;
       const currentWebrtc = latestWebrtcRef.current;
 
-      const paddingRight = currentState.settings.paddingRight || 0;
+      const padTop = currentState.settings.padding.top || 0;
+      const padBottom = currentState.settings.padding.bottom || 0;
+      const padLeft = currentState.settings.padding.left || 0;
+      const padRight = currentState.settings.padding.right || 0;
 
       if (screenVideo.readyState >= 2) {
-        // Expand canvas width to add padding space on the right
-        canvas.width = screenVideo.videoWidth + paddingRight;
-        canvas.height = screenVideo.videoHeight;
+        // Expand canvas width/height to add padding space on all sides
+        canvas.width = screenVideo.videoWidth + padLeft + padRight;
+        canvas.height = screenVideo.videoHeight + padTop + padBottom;
         
         // Fill background black for the padded area
-        if (paddingRight > 0) {
+        if (padTop > 0 || padBottom > 0 || padLeft > 0 || padRight > 0) {
           ctx.fillStyle = '#000000';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         
-        // Draw screen recording on the left
-        ctx.drawImage(screenVideo, 0, 0, screenVideo.videoWidth, screenVideo.videoHeight);
+        // Draw screen recording, shifted by top and left padding
+        ctx.drawImage(screenVideo, padLeft, padTop, screenVideo.videoWidth, screenVideo.videoHeight);
 
         // Draw segmented webcam overlay if available
         if (
@@ -331,9 +334,8 @@ export default function App() {
         const delayNode = audioCtx.createDelay(1.0);
         delayNode.delayTime.value = 0.1; // 100ms
         
-        // Boost webcam audio volume (which was too low)
         const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 2.5; // 250% volume boost
+        gainNode.gain.value = 1.2; // Slight volume boost, avoiding distortion
         
         webcamSource.connect(gainNode);
         gainNode.connect(delayNode);
@@ -344,7 +346,7 @@ export default function App() {
       if (state.micStream && state.micStream.getAudioTracks().length > 0) {
         const micSource = audioCtx.createMediaStreamSource(state.micStream);
         const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 2.5; // 250% volume boost
+        gainNode.gain.value = 1.2;
         micSource.connect(gainNode);
         gainNode.connect(audioDest);
         hasAudio = true;

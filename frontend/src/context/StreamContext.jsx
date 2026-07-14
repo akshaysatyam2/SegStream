@@ -78,7 +78,12 @@ const initialState = {
     format: 'mp4',         // Recording output format
     rtspEnabled: false,    // Whether to enable RTSP re-streaming
     backendUrl: BACKEND_URL,
-    paddingRight: 0,       // Padding to add to the right side of the screen recording for the webcam
+    padding: {             // Directional padding around the screen recording
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0
+    },
   },
 };
 
