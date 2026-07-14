@@ -39,7 +39,8 @@ import { DEFAULT_OVERLAY, BACKEND_URL } from '../utils/constants.js';
 const initialState = {
   /* --- Media Streams --- */
   screenStream: null,   // MediaStream from getDisplayMedia
-  webcamStream: null,   // MediaStream from getUserMedia
+  webcamStream: null,   // MediaStream from getUserMedia (video+audio)
+  micStream: null,      // MediaStream from getUserMedia (audio only)
 
   /* --- Connection --- */
   connectionStatus: 'disconnected', // 'disconnected' | 'connecting' | 'connected' | 'error'
@@ -94,6 +95,9 @@ function streamReducer(state, action) {
 
     case 'SET_WEBCAM_STREAM':
       return { ...state, webcamStream: action.payload };
+      
+    case 'SET_MIC_STREAM':
+      return { ...state, micStream: action.payload };
 
     /* --- Connection Actions --- */
     case 'SET_CONNECTION_STATUS':

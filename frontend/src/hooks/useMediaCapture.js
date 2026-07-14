@@ -35,6 +35,7 @@ export function useMediaCapture(dispatch) {
   /* --- State --- */
   const [screenStream, setScreenStream] = useState(null);
   const [webcamStream, setWebcamStream] = useState(null);
+  const [micStream, setMicStream] = useState(null);
   const [availableDevices, setAvailableDevices] = useState([]);
   const [selectedDevices, setSelectedDevices] = useState({
     videoInput: '',  // deviceId for webcam
@@ -44,6 +45,7 @@ export function useMediaCapture(dispatch) {
   /* Refs to hold current streams for cleanup in callbacks */
   const screenStreamRef = useRef(null);
   const webcamStreamRef = useRef(null);
+  const micStreamRef = useRef(null);
 
   /* ============================================================
      DEVICE ENUMERATION
@@ -194,6 +196,40 @@ export function useMediaCapture(dispatch) {
   }, [selectedDevices.videoInput, selectedDevices.audioInput, enumerateDevices]);
 
   /* ============================================================
+     MICROPHONE CAPTURE — getUserMedia (Audio Only)
+     Captures standalone microphone for narration.
+     ============================================================ */
+  const startMic = useCallback(async (options = {}) => {
+    try {
+      if (micStreamRef.current) {
+        micStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          deviceId: selectedDevices.audioInput
+            ? { exact: selectedDevices.audioInput }
+            : undefined,
+          echoCancellation: true,
+          noiseSuppression: true,
+          ...options.audio,
+        },
+      });
+      stream.getTracks().forEach((track) => {
+        track.addEventListener('ended', () => {
+          setMicStream(null);
+          micStreamRef.current = null;
+        });
+      });
+      micStreamRef.current = stream;
+      setMicStream(stream);
+      return stream;
+    } catch (err) {
+      console.error('[useMediaCapture] Mic capture failed:', err);
+      return null;
+    }
+  }, [selectedDevices.audioInput]);
+
+  /* ============================================================
      STOP FUNCTIONS
      Clean up MediaStream tracks to release camera/screen access.
      ============================================================ */
@@ -213,10 +249,19 @@ export function useMediaCapture(dispatch) {
     }
   }, []);
 
+  const stopMic = useCallback(() => {
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
+      setMicStream(null);
+    }
+  }, []);
+
   const stopAll = useCallback(() => {
     stopScreenCapture();
     stopWebcam();
-  }, [stopScreenCapture, stopWebcam]);
+    stopMic();
+  }, [stopScreenCapture, stopWebcam, stopMic]);
 
   /* ============================================================
      DEVICE SELECTION
@@ -253,6 +298,9 @@ export function useMediaCapture(dispatch) {
       if (webcamStreamRef.current) {
         webcamStreamRef.current.getTracks().forEach((t) => t.stop());
       }
+      if (micStreamRef.current) {
+        micStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
     };
   }, []);
 
@@ -263,10 +311,13 @@ export function useMediaCapture(dispatch) {
   return {
     screenStream,
     webcamStream,
+    micStream,
     startScreenCapture,
     startWebcam,
+    startMic,
     stopScreenCapture,
     stopWebcam,
+    stopMic,
     stopAll,
     availableDevices,
     selectedDevices,

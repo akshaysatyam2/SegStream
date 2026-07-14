@@ -180,6 +180,27 @@ function DeviceSelector({ mediaCapture }) {
             No microphones detected
           </p>
         )}
+
+        <button
+          className={`device-selector__capture-btn ${
+            mediaCapture.micStream ? 'device-selector__capture-btn--active' : ''
+          }`}
+          onClick={() => mediaCapture.micStream ? mediaCapture.stopMic() : mediaCapture.startMic()}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {mediaCapture.micStream ? (
+              <rect x="6" y="6" width="12" height="12" rx="1" />
+            ) : (
+              <>
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </>
+            )}
+          </svg>
+          <span>{mediaCapture.micStream ? 'Stop Microphone' : 'Start Microphone'}</span>
+        </button>
       </div>
 
       {/* --- Device count summary --- */}

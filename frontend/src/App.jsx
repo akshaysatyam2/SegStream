@@ -100,6 +100,10 @@ export default function App() {
     dispatch({ type: 'SET_WEBCAM_STREAM', payload: mediaCapture.webcamStream });
   }, [mediaCapture.webcamStream, dispatch]);
 
+  useEffect(() => {
+    dispatch({ type: 'SET_MIC_STREAM', payload: mediaCapture.micStream });
+  }, [mediaCapture.micStream, dispatch]);
+
   /**
    * Auto-connect and auto-reconnect logic.
    * If disconnected or error, retry connection after 2 seconds.
@@ -336,6 +340,15 @@ export default function App() {
         hasAudio = true;
       }
 
+      if (state.micStream && state.micStream.getAudioTracks().length > 0) {
+        const micSource = audioCtx.createMediaStreamSource(state.micStream);
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 2.5; // 250% volume boost
+        micSource.connect(gainNode);
+        gainNode.connect(audioDest);
+        hasAudio = true;
+      }
+
       if (hasAudio) {
         audioDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
       }
@@ -378,7 +391,7 @@ export default function App() {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
     }
-  }, [state.isRecording, state.screenStream, state.webcamStream]);
+  }, [state.isRecording, state.screenStream, state.webcamStream, state.micStream]);
 
   /**
    * Sync webcam overlay position, size, and shape to the backend.
