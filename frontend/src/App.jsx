@@ -276,12 +276,31 @@ export default function App() {
       const canvas = masterCanvasRef.current;
       const stream = canvas.captureStream(30); // 30 FPS
 
-      // Add audio tracks
-      if (state.screenStream) {
-        state.screenStream.getAudioTracks().forEach(t => stream.addTrack(t));
+      // Mix audio tracks using Web Audio API so both Mic and System Audio are recorded
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const audioDest = audioCtx.createMediaStreamDestination();
+      let hasAudio = false;
+
+      if (state.screenStream && state.screenStream.getAudioTracks().length > 0) {
+        const screenSource = audioCtx.createMediaStreamSource(state.screenStream);
+        screenSource.connect(audioDest);
+        hasAudio = true;
       }
-      if (state.webcamStream) {
-        state.webcamStream.getAudioTracks().forEach(t => stream.addTrack(t));
+      
+      if (state.webcamStream && state.webcamStream.getAudioTracks().length > 0) {
+        const webcamSource = audioCtx.createMediaStreamSource(state.webcamStream);
+        
+        // Add a 100ms delay to the microphone to sync it with the YOLO AI segmentation latency
+        const delayNode = audioCtx.createDelay(1.0);
+        delayNode.delayTime.value = 0.1; // 100ms
+        
+        webcamSource.connect(delayNode);
+        delayNode.connect(audioDest);
+        hasAudio = true;
+      }
+
+      if (hasAudio) {
+        audioDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
       }
 
       let recorder;
