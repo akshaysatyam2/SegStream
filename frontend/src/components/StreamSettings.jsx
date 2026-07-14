@@ -147,6 +147,27 @@ function StreamSettings({ webrtc }) {
         </select>
       </div>
 
+      {/* --- Layout Padding --- */}
+      <div className="stream-settings__group">
+        <label className="stream-settings__label">
+          Sidebar Padding (px)
+          <span className="stream-settings__value">{settings.paddingRight || 0}px</span>
+        </label>
+        <input
+          type="range"
+          className="stream-settings__slider"
+          min="0"
+          max="800"
+          step="50"
+          value={settings.paddingRight || 0}
+          onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { paddingRight: Number(e.target.value) } })}
+        />
+        <div className="stream-settings__slider-labels">
+          <span>0px</span>
+          <span>800px</span>
+        </div>
+      </div>
+
       {/* --- RTSP Toggle --- */}
       <div className="stream-settings__group stream-settings__group--toggle">
         <label className="stream-settings__label">RTSP Re-Stream</label>

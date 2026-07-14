@@ -177,14 +177,35 @@ function StreamPreview({ webrtc }) {
   return (
     <div className="preview" ref={previewContainerRef}>
       {screenStream ? (
-        /* --- Active screen capture --- */
-        <video
-          ref={screenVideoRef}
-          className="preview__screen"
-          autoPlay
-          playsInline
-          muted
-        />
+        /* --- Active screen capture with optional padding --- */
+        <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'center' }}>
+          <video
+            ref={screenVideoRef}
+            className="preview__screen"
+            autoPlay
+            playsInline
+            muted
+            style={{ 
+               flexGrow: 1, 
+               flexShrink: 1,
+               minWidth: 0,
+               objectFit: 'contain', 
+               maxWidth: state.settings.paddingRight > 0 
+                  ? `${(screenVideoRef.current?.videoWidth || 1920) / ((screenVideoRef.current?.videoWidth || 1920) + state.settings.paddingRight) * 100}%` 
+                  : '100%' 
+            }}
+          />
+          {state.settings.paddingRight > 0 && (
+            <div 
+               style={{ 
+                  backgroundColor: '#000000', 
+                  width: `${state.settings.paddingRight / ((screenVideoRef.current?.videoWidth || 1920) + state.settings.paddingRight) * 100}%`,
+                  height: '100%',
+                  flexShrink: 0
+               }} 
+            />
+          )}
+        </div>
       ) : (
         /* --- Placeholder when no screen is captured --- */
         <div className="preview__placeholder">

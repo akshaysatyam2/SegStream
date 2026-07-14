@@ -93,20 +93,33 @@ export function useWebRTC(dispatch) {
               const vh = videoRef.current.videoHeight;
               
               if (vw > 0 && vh > 0) {
-                // Force YOLO native input size to avoid backend squishing
+                // Center-crop (emulate object-fit: cover) to 640x640 YOLO native input size.
+                // This ensures the face is large and central, avoiding getting cut off later.
                 const targetSize = 640;
                 if (canvasRef.current.width !== targetSize) canvasRef.current.width = targetSize;
                 if (canvasRef.current.height !== targetSize) canvasRef.current.height = targetSize;
 
-                // Letterbox: pad with YOLO standard grey
-                ctx.fillStyle = '#727272';
-                ctx.fillRect(0, 0, targetSize, targetSize);
-
-                const scale = Math.min(targetSize / vw, targetSize / vh);
-                const dw = targetSize - vw * scale;
-                const dh = targetSize - vh * scale;
+                const imgRatio = vw / vh;
+                const boxRatio = 1; // 640 / 640
                 
-                ctx.drawImage(videoRef.current, dw / 2, dh / 2, vw * scale, vh * scale);
+                let renderW, renderH, offsetX, offsetY;
+                if (imgRatio > boxRatio) {
+                   renderH = targetSize;
+                   renderW = targetSize * imgRatio;
+                   offsetX = (targetSize - renderW) / 2;
+                   offsetY = 0;
+                } else {
+                   renderW = targetSize;
+                   renderH = targetSize / imgRatio;
+                   offsetX = 0;
+                   offsetY = (targetSize - renderH) / 2;
+                }
+                
+                // Clear the canvas just in case, though drawImage covers it
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, targetSize, targetSize);
+                
+                ctx.drawImage(videoRef.current, offsetX, offsetY, renderW, renderH);
 
                 waitingForResponseRef.current = true;
                 canvasRef.current.toBlob(
@@ -123,10 +136,10 @@ export function useWebRTC(dispatch) {
               }
             }
 
-            requestAnimationFrame(loop);
+            setTimeout(loop, 33); // 30 FPS target
           };
 
-          requestAnimationFrame(loop);
+          setTimeout(loop, 33);
         };
 
         ws.onmessage = (event) => {

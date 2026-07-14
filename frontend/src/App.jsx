@@ -184,10 +184,21 @@ export default function App() {
       const currentState = latestStateRef.current;
       const currentWebrtc = latestWebrtcRef.current;
 
+      const paddingRight = currentState.settings.paddingRight || 0;
+
       if (screenVideo.readyState >= 2) {
-        canvas.width = screenVideo.videoWidth;
+        // Expand canvas width to add padding space on the right
+        canvas.width = screenVideo.videoWidth + paddingRight;
         canvas.height = screenVideo.videoHeight;
-        ctx.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+        
+        // Fill background black for the padded area
+        if (paddingRight > 0) {
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Draw screen recording on the left
+        ctx.drawImage(screenVideo, 0, 0, screenVideo.videoWidth, screenVideo.videoHeight);
 
         // Draw segmented webcam overlay if available
         if (
@@ -276,9 +287,9 @@ export default function App() {
           ctx.globalAlpha = 1.0;
         }
       }
-      requestAnimationFrame(loop);
+      setTimeout(loop, 33); // 30 FPS target (prevents background tab freezing)
     };
-    requestAnimationFrame(loop);
+    setTimeout(loop, 33);
 
     return () => { 
       isCompositing = false; 
@@ -315,7 +326,12 @@ export default function App() {
         const delayNode = audioCtx.createDelay(1.0);
         delayNode.delayTime.value = 0.1; // 100ms
         
-        webcamSource.connect(delayNode);
+        // Boost webcam audio volume (which was too low)
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 2.5; // 250% volume boost
+        
+        webcamSource.connect(gainNode);
+        gainNode.connect(delayNode);
         delayNode.connect(audioDest);
         hasAudio = true;
       }
@@ -401,6 +417,7 @@ export default function App() {
           <div className="studio-layout">
             {/* Left panel — source selection and overlay positioning */}
             <aside className="studio-layout__sidebar studio-layout__sidebar--left">
+              <RecordingControls webrtc={webrtc} />
               <DeviceSelector
                 mediaCapture={mediaCapture}
               />
@@ -416,11 +433,6 @@ export default function App() {
             <aside className="studio-layout__sidebar studio-layout__sidebar--right">
               <StreamSettings webrtc={webrtc} />
             </aside>
-
-            {/* Bottom — recording controls span full width */}
-            <div className="studio-layout__controls">
-              <RecordingControls webrtc={webrtc} />
-            </div>
           </div>
         ) : (
           /**
