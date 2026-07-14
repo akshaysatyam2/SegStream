@@ -10,51 +10,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Colors */
-  --ss-bg-primary: #0a0a0f;
-  --ss-bg-panel: #12121a;
-  --ss-bg-card: #1a1a2e;
+  /* Colors - Tailwind Design System */
+  --ss-bg-primary: #e5e7eb; /* bg-gray-200 (Page Body) */
+  --ss-bg-panel: #e5e7eb;
+  --ss-bg-card: whitesmoke; /* Card background */
   
-  --ss-glass-bg: rgba(255, 255, 255, 0.03);
+  --ss-glass-bg: rgba(245, 245, 245, 0.85); /* whitesmoke with opacity for glass */
   --ss-glass-filter: blur(20px);
-  --ss-glass-border: rgba(255, 255, 255, 0.06);
+  --ss-glass-border: rgba(0, 0, 0, 0.05);
 
-  --ss-accent-primary: #FF9F1C; /* Pupsn Vibrant Orange */
-  --ss-accent-secondary: #2EC4B6; /* Pupsn Teal */
+  --ss-accent-primary: #f97316; /* bg-orange-500 (Primary/Highlights) */
+  --ss-accent-secondary: #111827; /* bg-gray-900 (Secondary/Headers) */
 
-  --ss-text-primary: #f8fafc;
-  --ss-text-secondary: #94a3b8;
-  --ss-text-muted: #475569;
+  --ss-text-primary: #111827; /* text-gray-900 */
+  --ss-text-secondary: #374151; /* text-gray-700 */
+  --ss-text-muted: #6b7280; /* text-gray-500 */
 
   --ss-success: #10b981;
   --ss-warning: #f59e0b;
-  --ss-error: #ef4444;
+  --ss-error: #ef4444; /* bg-red-500 (Destructive) */
 
   /* Typography */
   --ss-font-family: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Borders & Shadows */
-  --ss-radius-card: 12px;
-  --ss-radius-input: 8px;
+  --ss-radius-card: 0.5rem; /* rounded-lg */
+  --ss-radius-input: 0.375rem; /* rounded-md */
   --ss-radius-pill: 20px;
   
-  --ss-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-/* Light Theme Overrides (if toggled) */
-html[data-theme="light"] {
-  --ss-bg-primary: #f8fafc;
-  --ss-bg-panel: #f1f5f9;
-  --ss-bg-card: #ffffff;
-  
-  --ss-glass-bg: rgba(255, 255, 255, 0.7);
-  --ss-glass-border: rgba(0, 0, 0, 0.1);
-
-  --ss-text-primary: #0f172a;
-  --ss-text-secondary: #475569;
-  --ss-text-muted: #94a3b8;
-
-  --ss-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --ss-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
 }
 
 * {
