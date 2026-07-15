@@ -310,11 +310,14 @@ class PersonSegmenter:
             # Sigmoid activation.
             inst_mask = 1.0 / (1.0 + np.exp(-inst_mask))
 
-            # Crop mask to bounding box region (improves quality).
-            bx1 = int(max(0, x1[idx] / self._input_w * mask_w))
-            by1 = int(max(0, y1[idx] / self._input_h * mask_h))
-            bx2 = int(min(mask_w, x2[idx] / self._input_w * mask_w))
-            by2 = int(min(mask_h, y2[idx] / self._input_h * mask_h))
+            # Crop mask to bounding box region with a generous margin to prevent cutting face/head.
+            margin_x = (x2[idx] - x1[idx]) * 0.15
+            margin_y = (y2[idx] - y1[idx]) * 0.15
+            
+            bx1 = int(max(0, (x1[idx] - margin_x) / self._input_w * mask_w))
+            by1 = int(max(0, (y1[idx] - margin_y) / self._input_h * mask_h))
+            bx2 = int(min(mask_w, (x2[idx] + margin_x) / self._input_w * mask_w))
+            by2 = int(min(mask_h, (y2[idx] + margin_y) / self._input_h * mask_h))
 
             cropped = np.zeros_like(inst_mask)
             cropped[by1:by2, bx1:bx2] = inst_mask[by1:by2, bx1:bx2]

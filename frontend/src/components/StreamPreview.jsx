@@ -42,12 +42,18 @@ function StreamPreview({ webrtc }) {
   useEffect(() => {
     if (screenVideoRef.current) {
       screenVideoRef.current.srcObject = screenStream || null;
+      if (screenStream) {
+        screenVideoRef.current.play().catch(e => console.error("Screen video play failed", e));
+      }
     }
   }, [screenStream]);
 
   useEffect(() => {
     if (webcamVideoRef.current) {
       webcamVideoRef.current.srcObject = webcamStream || null;
+      if (webcamStream) {
+        webcamVideoRef.current.play().catch(e => console.error("Webcam video play failed", e));
+      }
     }
   }, [webcamStream]);
 
