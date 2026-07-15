@@ -154,6 +154,7 @@ export default function App() {
 
   // Keep latest state in refs so the loop can read them without stale closures or dependency re-renders
   const latestStateRef = useRef(state);
+  const audioCtxRef = useRef(null);
   const latestWebrtcRef = useRef(webrtc);
   useEffect(() => {
     latestStateRef.current = state;
@@ -213,23 +214,26 @@ export default function App() {
           currentWebrtc.segmentedImgRef.current &&
           currentWebrtc.segmentedImgRef.current.width > 0
         ) {
-          // Helper to emulate object-fit: cover
-          const drawImageCover = (ctx, img, x, y, w, h) => {
+          // Render a segmented image using object-fit: contain logic to prevent face cutting
+          const drawImageContain = (ctx, img, x, y, w, h) => {
              const imgW = img.width || img.naturalWidth;
              const imgH = img.height || img.naturalHeight;
+             if (!imgW || !imgH) return;
              const imgRatio = imgW / imgH;
              const boxRatio = w / h;
+             
              let renderW, renderH, offsetX, offsetY;
+             // For contain, if image is wider than box, fit width
              if (imgRatio > boxRatio) {
-                renderH = h;
-                renderW = h * imgRatio;
-                offsetX = (w - renderW) / 2;
-                offsetY = 0;
-             } else {
                 renderW = w;
                 renderH = w / imgRatio;
                 offsetX = 0;
                 offsetY = (h - renderH) / 2;
+             } else {
+                renderH = h;
+                renderW = h * imgRatio;
+                offsetX = (w - renderW) / 2;
+                offsetY = 0;
              }
              ctx.drawImage(img, x + offsetX, y + offsetY, renderW, renderH);
           };
@@ -280,17 +284,17 @@ export default function App() {
              ctx.beginPath();
              ctx.arc(mappedX + mappedW/2, mappedY + mappedH/2, Math.min(mappedW, mappedH)/2, 0, Math.PI * 2);
              ctx.clip();
-             drawImageCover(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
+             drawImageContain(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
              ctx.restore();
           } else if (overlay.shape === 'rounded') {
              ctx.save();
              ctx.beginPath();
              ctx.roundRect(mappedX, mappedY, mappedW, mappedH, 16);
              ctx.clip();
-             drawImageCover(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
+             drawImageContain(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
              ctx.restore();
           } else {
-             drawImageCover(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
+             drawImageContain(ctx, currentWebrtc.segmentedImgRef.current, mappedX, mappedY, mappedW, mappedH);
           }
           ctx.globalAlpha = 1.0;
         }
@@ -318,6 +322,7 @@ export default function App() {
 
       // Mix audio tracks using Web Audio API so both Mic and System Audio are recorded
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtxRef.current = audioCtx;
       const audioDest = audioCtx.createMediaStreamDestination();
       let hasAudio = false;
 
@@ -379,6 +384,10 @@ export default function App() {
       mediaRecorderRef.current = recorder;
     } else if (!state.isRecording && mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+        audioCtxRef.current = null;
+      }
       mediaRecorderRef.current = null;
     }
   }, [state.isRecording, state.screenStream, state.webcamStream, state.micStream]);
