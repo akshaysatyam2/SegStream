@@ -68,7 +68,7 @@
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--ss-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ss-bg-interactive);
   color: var(--ss-text-primary);
   font-size: 13px;
   font-weight: 500;
@@ -79,8 +79,8 @@
 }
 
 .device-selector__capture-btn:hover {
-  background: rgba(124, 58, 237, 0.1);
-  border-color: rgba(124, 58, 237, 0.3);
+  background: var(--ss-bg-interactive-hover);
+  border-color: rgba(255, 159, 28, 0.3);
 }
 
 /* Active state — green tint */
@@ -102,7 +102,7 @@
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--ss-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ss-bg-interactive);
   color: var(--ss-text-primary);
   font-size: 12px;
   font-family: var(--ss-font);
@@ -113,7 +113,7 @@
 }
 
 .device-selector__select:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--ss-border-hover);
 }
 
 .device-selector__select:focus {

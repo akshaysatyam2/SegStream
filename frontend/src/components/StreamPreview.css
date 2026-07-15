@@ -102,13 +102,13 @@
 
 .preview__overlay:hover {
   border-color: var(--ss-accent);
-  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 24px var(--ss-accent-glow);
 }
 
 .preview__overlay--dragging {
   cursor: grabbing;
   border-color: var(--ss-accent);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 8px 32px var(--ss-accent-glow);
 }
 
 /* --- Shape variants --- */

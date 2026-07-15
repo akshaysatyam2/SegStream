@@ -32,6 +32,7 @@ function StreamPreview({ webrtc }) {
   /* Drag state — using refs for performance (no re-render during drag) */
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, startX: 0, startY: 0 });
+  const webrtcRef = useRef(webrtc);
 
   /* ============================================================
      ATTACH STREAMS TO VIDEO ELEMENTS
@@ -55,15 +56,16 @@ function StreamPreview({ webrtc }) {
     let isRunning = true;
     const loop = () => {
       if (!isRunning) return;
+      const rtc = webrtcRef.current;
       if (
-        webrtc &&
-        webrtc.connectionStatus === 'connected' &&
-        webrtc.segmentedImgRef &&
-        webrtc.segmentedImgRef.current &&
+        rtc &&
+        rtc.connectionStatus === 'connected' &&
+        rtc.segmentedImgRef &&
+        rtc.segmentedImgRef.current &&
         webcamImgRef.current
       ) {
         const canvas = webcamImgRef.current;
-        const bitmap = webrtc.segmentedImgRef.current;
+        const bitmap = rtc.segmentedImgRef.current;
         if (bitmap.width && bitmap.height) {
           if (canvas.width !== bitmap.width) canvas.width = bitmap.width;
           if (canvas.height !== bitmap.height) canvas.height = bitmap.height;
@@ -76,7 +78,7 @@ function StreamPreview({ webrtc }) {
     };
     requestAnimationFrame(loop);
     return () => { isRunning = false; };
-  }, [webrtc]);
+  }, []);
 
   /* ============================================================
      TRACK PREVIEW CONTAINER SIZE
@@ -180,6 +182,8 @@ function StreamPreview({ webrtc }) {
   /* ============================================================
      RENDER
      ============================================================ */
+  webrtcRef.current = webrtc;
+
   const padT = state.settings.padding?.top || 0;
   const padB = state.settings.padding?.bottom || 0;
   const padL = state.settings.padding?.left || 0;
@@ -218,7 +222,7 @@ function StreamPreview({ webrtc }) {
                width: `${(vw / totalW) * 100}%`,
                height: `${(vh / totalH) * 100}%`,
                objectFit: 'contain',
-               backgroundColor: '#000'
+               backgroundColor: 'var(--ss-bg-darkest)'
             }}
           />
         </div>
@@ -257,7 +261,6 @@ function StreamPreview({ webrtc }) {
             <canvas
               ref={webcamImgRef}
               className="preview__overlay-video"
-              alt="Segmented overlay"
             />
           ) : (
             <video

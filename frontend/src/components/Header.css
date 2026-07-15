@@ -45,7 +45,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px var(--ss-accent-glow);
 }
 
 .header__logo-text {
@@ -88,7 +88,7 @@
   gap: 8px;
   padding: 6px 16px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ss-bg-interactive);
   border: 1px solid var(--ss-border);
   font-size: 13px;
   font-weight: 500;
@@ -114,7 +114,7 @@
 
 .header__status--connecting .header__status-dot {
   background: var(--ss-warning);
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 8px var(--ss-bg-interactive);
   animation: status-pulse 1.5s ease-in-out infinite;
 }
 
@@ -152,16 +152,16 @@
   height: 40px;
   border-radius: 10px;
   border: 1px solid var(--ss-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ss-bg-interactive);
   color: var(--ss-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .header__theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--ss-border);
   color: var(--ss-text-primary);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--ss-border-hover);
 }
 
 .header__theme-toggle:active {

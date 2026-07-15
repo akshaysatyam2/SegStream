@@ -44,7 +44,7 @@
   padding: 10px 24px;
   border-radius: 20px;
   border: 1px solid var(--ss-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ss-bg-interactive);
   color: var(--ss-text-primary);
   font-size: 14px;
   font-weight: 600;
@@ -136,7 +136,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--ss-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ss-bg-interactive);
   color: var(--ss-text-primary);
   font-size: 13px;
   font-family: var(--ss-font);
@@ -168,7 +168,7 @@
   padding: 10px 20px;
   border-radius: 8px;
   border: 1px solid var(--ss-border);
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(255, 159, 28, 0.1);
   color: var(--ss-accent);
   font-size: 14px;
   font-weight: 600;
@@ -178,7 +178,7 @@
 }
 
 .recording-controls__connect-btn:hover:not(:disabled) {
-  background: rgba(124, 58, 237, 0.2);
+  background: rgba(255, 159, 28, 0.2);
   border-color: var(--ss-accent);
 }
 
