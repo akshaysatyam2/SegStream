@@ -158,14 +158,7 @@ export function useMediaCapture(dispatch) {
           frameRate: { ideal: 30 },
           ...options.video,
         },
-        audio: {
-          deviceId: selectedDevices.audioInput
-            ? { exact: selectedDevices.audioInput }
-            : undefined,
-          echoCancellation: true,
-          noiseSuppression: true,
-          ...options.audio,
-        },
+        audio: false,
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);

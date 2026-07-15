@@ -43,6 +43,22 @@
   --ss-shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15); /* shadow-lg for dark mode */
 }
 
+:root[data-theme="light"] {
+  --ss-bg-primary: #f3f4f6; /* bg-gray-100 */
+  --ss-bg-panel: #ffffff;
+  --ss-bg-card: #f9fafb;
+  
+  --ss-glass-bg: rgba(255, 255, 255, 0.85);
+  --ss-glass-border: rgba(0, 0, 0, 0.1);
+
+  --ss-text-primary: #111827;
+  --ss-text-secondary: #374151;
+  --ss-text-muted: #6b7280;
+  --ss-border: rgba(0, 0, 0, 0.1);
+
+  --ss-shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

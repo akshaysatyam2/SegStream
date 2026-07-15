@@ -329,26 +329,13 @@ export default function App() {
       
       if (state.webcamStream && state.webcamStream.getAudioTracks().length > 0) {
         const webcamSource = audioCtx.createMediaStreamSource(state.webcamStream);
-        
-        // Add a 100ms delay to the microphone to sync it with the YOLO AI segmentation latency
-        const delayNode = audioCtx.createDelay(1.0);
-        delayNode.delayTime.value = 0.1; // 100ms
-        
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 1.2; // Slight volume boost, avoiding distortion
-        
-        webcamSource.connect(gainNode);
-        gainNode.connect(delayNode);
-        delayNode.connect(audioDest);
+        webcamSource.connect(audioDest);
         hasAudio = true;
       }
 
       if (state.micStream && state.micStream.getAudioTracks().length > 0) {
         const micSource = audioCtx.createMediaStreamSource(state.micStream);
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 1.2;
-        micSource.connect(gainNode);
-        gainNode.connect(audioDest);
+        micSource.connect(audioDest);
         hasAudio = true;
       }
 

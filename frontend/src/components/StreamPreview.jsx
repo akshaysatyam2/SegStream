@@ -62,8 +62,14 @@ function StreamPreview({ webrtc }) {
         webrtc.segmentedImgRef.current &&
         webcamImgRef.current
       ) {
-        if (webcamImgRef.current.src !== webrtc.segmentedImgRef.current.src) {
-          webcamImgRef.current.src = webrtc.segmentedImgRef.current.src;
+        const canvas = webcamImgRef.current;
+        const bitmap = webrtc.segmentedImgRef.current;
+        if (bitmap.width && bitmap.height) {
+          if (canvas.width !== bitmap.width) canvas.width = bitmap.width;
+          if (canvas.height !== bitmap.height) canvas.height = bitmap.height;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(bitmap, 0, 0);
         }
       }
       requestAnimationFrame(loop);
@@ -174,11 +180,31 @@ function StreamPreview({ webrtc }) {
   /* ============================================================
      RENDER
      ============================================================ */
+  const padT = state.settings.padding?.top || 0;
+  const padB = state.settings.padding?.bottom || 0;
+  const padL = state.settings.padding?.left || 0;
+  const padR = state.settings.padding?.right || 0;
+  
+  // Use a fallback resolution if video is not loaded yet
+  const vw = screenVideoRef.current?.videoWidth || 1920;
+  const vh = screenVideoRef.current?.videoHeight || 1080;
+  
+  const totalW = vw + padL + padR;
+  const totalH = vh + padT + padB;
+
   return (
-    <div className="preview" ref={previewContainerRef}>
+    <div className="preview" ref={previewContainerRef} style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {screenStream ? (
         /* --- Active screen capture with optional padding --- */
-        <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'center' }}>
+        <div style={{ 
+          position: 'relative', 
+          aspectRatio: `${totalW} / ${totalH}`, 
+          maxHeight: '100%', 
+          maxWidth: '100%', 
+          backgroundColor: '#050505', // Slightly off-black so padding is visible against #000 video
+          border: (padT || padB || padL || padR) ? '1px dashed rgba(255,255,255,0.2)' : 'none',
+          margin: 'auto'
+        }}>
           <video
             ref={screenVideoRef}
             className="preview__screen"
@@ -186,25 +212,15 @@ function StreamPreview({ webrtc }) {
             playsInline
             muted
             style={{ 
-               flexGrow: 1, 
-               flexShrink: 1,
-               minWidth: 0,
-               objectFit: 'contain', 
-               maxWidth: state.settings.paddingRight > 0 
-                  ? `${(screenVideoRef.current?.videoWidth || 1920) / ((screenVideoRef.current?.videoWidth || 1920) + state.settings.paddingRight) * 100}%` 
-                  : '100%' 
+               position: 'absolute',
+               left: `${(padL / totalW) * 100}%`,
+               top: `${(padT / totalH) * 100}%`,
+               width: `${(vw / totalW) * 100}%`,
+               height: `${(vh / totalH) * 100}%`,
+               objectFit: 'contain',
+               backgroundColor: '#000'
             }}
           />
-          {state.settings.paddingRight > 0 && (
-            <div 
-               style={{ 
-                  backgroundColor: '#000000', 
-                  width: `${state.settings.paddingRight / ((screenVideoRef.current?.videoWidth || 1920) + state.settings.paddingRight) * 100}%`,
-                  height: '100%',
-                  flexShrink: 0
-               }} 
-            />
-          )}
         </div>
       ) : (
         /* --- Placeholder when no screen is captured --- */
@@ -238,7 +254,7 @@ function StreamPreview({ webrtc }) {
           title="Drag to reposition webcam overlay"
         >
           {webrtc?.connectionStatus === 'connected' ? (
-            <img
+            <canvas
               ref={webcamImgRef}
               className="preview__overlay-video"
               alt="Segmented overlay"
