@@ -201,8 +201,8 @@ function StreamPreview({ webrtc }) {
           aspectRatio: `${totalW} / ${totalH}`, 
           maxHeight: '100%', 
           maxWidth: '100%', 
-          backgroundColor: '#050505', // Slightly off-black so padding is visible against #000 video
-          border: (padT || padB || padL || padR) ? '1px dashed rgba(255,255,255,0.2)' : 'none',
+          backgroundColor: 'var(--ss-bg-panel)', // Make padding highly visible
+          border: (padT || padB || padL || padR) ? '2px dashed var(--ss-accent)' : 'none',
           margin: 'auto'
         }}>
           <video

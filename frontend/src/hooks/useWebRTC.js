@@ -93,33 +93,16 @@ export function useWebRTC(dispatch) {
               const vh = videoRef.current.videoHeight;
               
               if (vw > 0 && vh > 0) {
-                // Center-crop (emulate object-fit: cover) to 640x640 YOLO native input size.
-                // This ensures the face is large and central, avoiding getting cut off later.
-                const targetSize = 640;
-                if (canvasRef.current.width !== targetSize) canvasRef.current.width = targetSize;
-                if (canvasRef.current.height !== targetSize) canvasRef.current.height = targetSize;
-
-                const imgRatio = vw / vh;
-                const boxRatio = 1; // 640 / 640
+                // Scale down webcam feed to a manageable size (max width 640) while maintaining aspect ratio
+                // This prevents cutting off the face and sends the full frame to the backend.
+                const targetWidth = 640;
+                const renderW = targetWidth;
+                const renderH = targetWidth / imgRatio;
                 
-                let renderW, renderH, offsetX, offsetY;
-                if (imgRatio > boxRatio) {
-                   renderH = targetSize;
-                   renderW = targetSize * imgRatio;
-                   offsetX = (targetSize - renderW) / 2;
-                   offsetY = 0;
-                } else {
-                   renderW = targetSize;
-                   renderH = targetSize / imgRatio;
-                   offsetX = 0;
-                   offsetY = (targetSize - renderH) / 2;
-                }
+                if (canvasRef.current.width !== renderW) canvasRef.current.width = renderW;
+                if (canvasRef.current.height !== renderH) canvasRef.current.height = renderH;
                 
-                // Clear the canvas just in case, though drawImage covers it
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, targetSize, targetSize);
-                
-                ctx.drawImage(videoRef.current, offsetX, offsetY, renderW, renderH);
+                ctx.drawImage(videoRef.current, 0, 0, renderW, renderH);
 
                 waitingForResponseRef.current = true;
                 canvasRef.current.toBlob(
@@ -147,7 +130,8 @@ export function useWebRTC(dispatch) {
           // event.data is Blob
           if (event.data instanceof Blob) {
             try {
-              const bitmap = await createImageBitmap(event.data);
+              const pngBlob = new Blob([event.data], { type: 'image/png' });
+              const bitmap = await createImageBitmap(pngBlob);
               // Clean up the old bitmap if it exists
               if (segmentedImgRef.current && segmentedImgRef.current.close) {
                 segmentedImgRef.current.close();

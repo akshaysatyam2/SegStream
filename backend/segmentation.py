@@ -174,6 +174,7 @@ class PersonSegmenter:
 
         # Build BGRA image with alpha = mask.
         bgra = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
+        bgra[mask == 0] = [0, 0, 0, 0]  # Zero out background completely
         bgra[:, :, 3] = mask  # 255 where person, 0 elsewhere
 
         return bgra, mask
