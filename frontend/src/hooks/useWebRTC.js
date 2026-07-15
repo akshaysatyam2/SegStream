@@ -95,6 +95,7 @@ export function useWebRTC(dispatch) {
               if (vw > 0 && vh > 0) {
                 // Scale down webcam feed to a manageable size (max width 640) while maintaining aspect ratio
                 // This prevents cutting off the face and sends the full frame to the backend.
+                const imgRatio = vw / vh;
                 const targetWidth = 640;
                 const renderW = targetWidth;
                 const renderH = targetWidth / imgRatio;
