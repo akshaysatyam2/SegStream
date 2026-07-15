@@ -33,6 +33,12 @@ function StreamPreview({ webrtc }) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, startX: 0, startY: 0 });
   const webrtcRef = useRef(webrtc);
+  
+  // Force re-render when video metadata loads
+  const [, setTick] = useState(0);
+  const handleLoadedMetadata = useCallback(() => {
+    setTick(t => t + 1);
+  }, []);
 
   /* ============================================================
      ATTACH STREAMS TO VIDEO ELEMENTS
@@ -207,13 +213,13 @@ function StreamPreview({ webrtc }) {
       {screenStream ? (
         /* --- Active screen capture with optional padding --- */
         <div style={{ 
-          position: 'relative', 
+          display: 'flex',
           aspectRatio: `${totalW} / ${totalH}`, 
           maxHeight: '100%', 
           maxWidth: '100%', 
           backgroundColor: 'var(--ss-bg-panel)', // Make padding highly visible
           border: (padT || padB || padL || padR) ? '2px dashed var(--ss-accent)' : 'none',
-          margin: 'auto'
+          padding: `${(padT / totalH) * 100}% ${(padR / totalW) * 100}% ${(padB / totalH) * 100}% ${(padL / totalW) * 100}%`
         }}>
           <video
             ref={screenVideoRef}
@@ -221,12 +227,10 @@ function StreamPreview({ webrtc }) {
             autoPlay
             playsInline
             muted
+            onLoadedMetadata={handleLoadedMetadata}
             style={{ 
-               position: 'absolute',
-               left: `${(padL / totalW) * 100}%`,
-               top: `${(padT / totalH) * 100}%`,
-               width: `${(vw / totalW) * 100}%`,
-               height: `${(vh / totalH) * 100}%`,
+               width: '100%',
+               height: '100%',
                objectFit: 'contain',
                backgroundColor: 'var(--ss-bg-darkest)'
             }}

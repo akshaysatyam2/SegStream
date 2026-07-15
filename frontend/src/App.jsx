@@ -374,8 +374,16 @@ export default function App() {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
         sampleRate: 48000, // Match common sample rate to prevent artifacts
       });
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       audioCtxRef.current = audioCtx;
+      
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.value = 2.0; // Boost overall volume
+      
       const audioDest = audioCtx.createMediaStreamDestination();
+      masterGain.connect(audioDest);
       const audioNodes = [];
       let hasAudio = false;
 
@@ -387,7 +395,7 @@ export default function App() {
           const gainNode = audioCtx.createGain();
           gainNode.gain.value = gainValue;
           source.connect(gainNode);
-          gainNode.connect(audioDest);
+          gainNode.connect(masterGain);
           audioNodes.push(source, gainNode); // Keep references to prevent GC
           hasAudio = true;
         } catch (e) {
@@ -396,10 +404,10 @@ export default function App() {
       };
 
       // Screen system audio — full volume
-      connectAudioSource(state.screenStream, 1.0);
+      connectAudioSource(state.screenStream, 1.2);
 
       // Webcam audio (if any) — moderate volume
-      connectAudioSource(state.webcamStream, 0.8);
+      connectAudioSource(state.webcamStream, 1.0);
 
       // Standalone microphone — boosted volume for narration
       connectAudioSource(state.micStream, 1.5);
@@ -459,8 +467,8 @@ export default function App() {
         }, 100);
       };
 
-      // Use 500ms timeslice for smoother audio (1000ms was causing breaks)
-      recorder.start(500);
+      // Remove timeslice to prevent chunk boundary audio breaking
+      recorder.start();
       mediaRecorderRef.current = recorder;
 
     } else if (!state.isRecording && mediaRecorderRef.current) {
