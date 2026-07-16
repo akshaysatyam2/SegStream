@@ -25,7 +25,7 @@ const STATUS_LABELS = {
   error: 'Error',
 };
 
-function Header({ theme, connectionStatus }) {
+function Header({ theme, connectionStatus, providerLabel }) {
   const { toggleTheme, isDark } = theme;
 
   /**
@@ -57,7 +57,9 @@ function Header({ theme, connectionStatus }) {
       <div className={`header__status header__status--${connectionStatus}`}>
         <span className="header__status-dot" />
         <span className="header__status-label">
-          {STATUS_LABELS[connectionStatus] || 'Unknown'}
+          {connectionStatus === 'connected' && providerLabel
+            ? `Connected · ${providerLabel}`
+            : STATUS_LABELS[connectionStatus] || 'Unknown'}
         </span>
       </div>
 

@@ -44,6 +44,7 @@ const initialState = {
 
   /* --- Connection --- */
   connectionStatus: 'disconnected', // 'disconnected' | 'connecting' | 'connected' | 'error'
+  providerLabel: '',                // Backend inference provider: 'CUDA (GPU)' | 'OpenVINO' | 'CPU'
 
   /* --- Recording --- */
   isRecording: false,
@@ -107,6 +108,9 @@ function streamReducer(state, action) {
     /* --- Connection Actions --- */
     case 'SET_CONNECTION_STATUS':
       return { ...state, connectionStatus: action.payload };
+
+    case 'SET_PROVIDER_LABEL':
+      return { ...state, providerLabel: action.payload };
 
     /* --- Recording Actions --- */
     case 'SET_RECORDING':

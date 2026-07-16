@@ -25,7 +25,7 @@ function formatBitrate(kbps) {
 
 function StatusBar() {
   const { state } = useStream();
-  const { stats, connectionStatus, isRecording } = state;
+  const { stats, connectionStatus, isRecording, providerLabel } = state;
 
   return (
     <footer className="status-bar">
@@ -67,6 +67,11 @@ function StatusBar() {
 
       {/* Right: Provider info */}
       <div className="status-bar__section">
+        {providerLabel && (
+          <span className={`status-bar__provider-badge status-bar__provider-badge--${providerLabel.includes('CUDA') ? 'cuda' : providerLabel.includes('OpenVINO') ? 'openvino' : 'cpu'}`}>
+            {providerLabel}
+          </span>
+        )}
         <span className="status-bar__provider">
           SegStream v1.0
         </span>

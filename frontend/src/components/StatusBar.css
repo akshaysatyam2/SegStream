@@ -141,6 +141,33 @@
   letter-spacing: 0.3px;
 }
 
+.status-bar__provider-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-bar__provider-badge--cuda {
+  background: rgba(118, 185, 0, 0.12);
+  color: #76b900;
+  border: 1px solid rgba(118, 185, 0, 0.25);
+}
+
+.status-bar__provider-badge--openvino {
+  background: rgba(0, 113, 197, 0.12);
+  color: #0071c5;
+  border: 1px solid rgba(0, 113, 197, 0.25);
+}
+
+.status-bar__provider-badge--cpu {
+  background: rgba(156, 163, 175, 0.12);
+  color: var(--ss-text-secondary);
+  border: 1px solid rgba(156, 163, 175, 0.2);
+}
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
