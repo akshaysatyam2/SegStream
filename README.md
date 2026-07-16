@@ -93,6 +93,12 @@ cd SegStream
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# (Optional) For Intel CPU/iGPU OpenVINO acceleration:
+# pip uninstall onnxruntime && pip install onnxruntime-openvino
+
+# (Optional) For NVIDIA GPU CUDA acceleration:
+# pip uninstall onnxruntime && pip install onnxruntime-gpu
 ```
 
 ### Export YOLO26 Model to ONNX

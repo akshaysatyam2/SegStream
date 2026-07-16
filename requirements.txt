@@ -12,7 +12,9 @@ opencv-python-headless>=4.9.0,<5.0.0
 numpy>=1.26.0
 Pillow>=10.2.0
 
-# ── ONNX Runtime (base CPU — install onnxruntime-gpu for CUDA support) ──────
+# ── ONNX Runtime (base CPU) ─────────────────────────────────────────────────
+# Note: For NVIDIA GPU acceleration, uninstall onnxruntime and run: pip install onnxruntime-gpu
+# Note: For Intel CPU/iGPU (OpenVINO), uninstall onnxruntime and run: pip install onnxruntime-openvino
 onnxruntime>=1.17.0,<2.0.0
 
 # ── Video Frame Handling (used by aiortc internally, pinned for stability) ──
