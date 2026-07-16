@@ -9,7 +9,7 @@ SegStream captures your screen and webcam simultaneously, runs YOLO segmentation
 ## Demo & Walkthrough
 
 Curious to see how it looks and why it was built? Check out the included demonstration video:
-[🎬 Watch the Demo & Walkthrough (`recordings/Demo_and_Walkthrough.webm`)](recordings/Demo_and_Walkthrough.webm)
+[🎬 Watch the Demo & Walkthrough (`Demo_and_Walkthrough.webm`)](Demo_and_Walkthrough.webm)
 
 ---
 
