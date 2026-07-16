@@ -1,0 +1,174 @@
+/**
+ * FloatingRecordButton.css — Floating Action Button Styles
+ *
+ * Persistent floating button with glassmorphism styling.
+ * Positioned bottom-right with smooth animations.
+ *
+ * @author Akshay Satyam
+ */
+
+/* ============================================================
+   FAB CONTAINER
+   Wraps the button and optional timer. Fixed positioning.
+   ============================================================ */
+.fab-record {
+  position: fixed;
+  bottom: 56px; /* Above the status bar */
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+/* ============================================================
+   TIMER BADGE
+   Shows elapsed recording time above the FAB.
+   ============================================================ */
+.fab-record__timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(15, 15, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  pointer-events: auto;
+  animation: fab-timer-in 0.3s ease;
+}
+
+.fab-record__timer-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ss-error, #ef4444);
+  animation: fab-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.fab-record__timer-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ss-error, #ef4444);
+  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   MAIN FAB BUTTON
+   Large circular button with gradient and glow effects.
+   ============================================================ */
+.fab-record__btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+
+  /* Default state — subtle dark with accent border */
+  background: linear-gradient(135deg, rgba(30, 30, 40, 0.9), rgba(20, 20, 30, 0.95));
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.fab-record__btn:hover {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(30, 30, 40, 0.95));
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(239, 68, 68, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--ss-error, #ef4444);
+}
+
+.fab-record__btn:active {
+  transform: scale(0.95);
+}
+
+/* ============================================================
+   RECORDING ACTIVE STATE
+   Red glowing button with pulse animation.
+   ============================================================ */
+.fab-record--active .fab-record__btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow:
+    0 4px 24px rgba(239, 68, 68, 0.4),
+    0 0 0 2px rgba(239, 68, 68, 0.3),
+    0 0 40px rgba(239, 68, 68, 0.15);
+  animation: fab-btn-pulse 2s ease-in-out infinite;
+}
+
+.fab-record--active .fab-record__btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: scale(1.08);
+  animation: none;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fab-dot-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes fab-btn-pulse {
+  0%, 100% {
+    box-shadow:
+      0 4px 24px rgba(239, 68, 68, 0.4),
+      0 0 0 2px rgba(239, 68, 68, 0.3),
+      0 0 40px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 4px 32px rgba(239, 68, 68, 0.6),
+      0 0 0 4px rgba(239, 68, 68, 0.15),
+      0 0 60px rgba(239, 68, 68, 0.2);
+  }
+}
+
+@keyframes fab-timer-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 639px) {
+  .fab-record {
+    bottom: 44px;
+    right: 16px;
+  }
+
+  .fab-record__btn {
+    width: 48px;
+    height: 48px;
+  }
+}
