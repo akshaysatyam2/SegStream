@@ -31,6 +31,7 @@ import RecordingControls from './components/RecordingControls.jsx';
 import StreamSettings from './components/StreamSettings.jsx';
 import DeviceSelector from './components/DeviceSelector.jsx';
 import StatusBar from './components/StatusBar.jsx';
+import FloatingRecordButton from './components/FloatingRecordButton.jsx';
 import MobileViewer from './components/MobileViewer.jsx';
 
 import './App.css';
@@ -103,6 +104,26 @@ export default function App() {
       dispatch({ type: 'UPDATE_STATS', payload: webrtc.stats });
     }
   }, [webrtc.stats, dispatch]);
+
+  /**
+   * Fetch backend provider label (CUDA / OpenVINO / CPU) once connected.
+   * Dispatches into context so the StatusBar can display it.
+   */
+  useEffect(() => {
+    if (webrtc.connectionStatus !== 'connected') return;
+
+    let cancelled = false;
+    fetch(`${stateRef.current.settings.backendUrl}/api/status`)
+      .then(res => res.json())
+      .then(data => {
+        if (!cancelled && data.provider_label) {
+          dispatch({ type: 'SET_PROVIDER_LABEL', payload: data.provider_label });
+        }
+      })
+      .catch(err => console.warn('[App] Failed to fetch provider info:', err));
+
+    return () => { cancelled = true; };
+  }, [webrtc.connectionStatus, dispatch]);
 
   /**
    * Pass screen/webcam streams into context when they change.
@@ -371,19 +392,26 @@ export default function App() {
       const stream = canvas.captureStream(30); // 30 FPS
 
       // --- Audio Mixing with Gain Control ---
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-        sampleRate: 48000, // Match common sample rate to prevent artifacts
-      });
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
       audioCtxRef.current = audioCtx;
       
+      // Audio chain: sources → individual gains → compressor → master gain → destination
+      const compressor = audioCtx.createDynamicsCompressor();
+      compressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
+      compressor.knee.setValueAtTime(30, audioCtx.currentTime);
+      compressor.ratio.setValueAtTime(4, audioCtx.currentTime);
+      compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+      compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+      
       const masterGain = audioCtx.createGain();
-      masterGain.gain.value = 2.0; // Boost overall volume
+      masterGain.gain.value = 3.0; // Boost overall volume (compressor prevents clipping)
       
       const audioDest = audioCtx.createMediaStreamDestination();
-      masterGain.connect(audioDest);
+      masterGain.connect(compressor);
+      compressor.connect(audioDest);
       const audioNodes = [];
       let hasAudio = false;
 
@@ -404,14 +432,15 @@ export default function App() {
       };
 
       // Screen system audio — full volume
-      connectAudioSource(state.screenStream, 1.2);
+      connectAudioSource(state.screenStream, 1.5);
 
       // Webcam audio (if any) — moderate volume
-      connectAudioSource(state.webcamStream, 1.0);
+      connectAudioSource(state.webcamStream, 1.5);
 
       // Standalone microphone — boosted volume for narration
-      connectAudioSource(state.micStream, 1.5);
+      connectAudioSource(state.micStream, 2.5);
 
+      audioNodes.push(masterGain, compressor); // Keep references to prevent GC
       audioNodesRef.current = audioNodes;
 
       if (hasAudio) {
@@ -526,7 +555,7 @@ export default function App() {
   return (
     <div className="app">
       {/* Top navigation bar — always visible */}
-      <Header theme={theme} connectionStatus={state.connectionStatus} />
+      <Header theme={theme} connectionStatus={state.connectionStatus} providerLabel={state.providerLabel} />
 
       <main className="app__main">
         {isDesktop ? (
@@ -571,6 +600,9 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Floating record button — always accessible */}
+      <FloatingRecordButton />
 
       {/* Bottom status bar — FPS, latency, connection info */}
       <StatusBar />
