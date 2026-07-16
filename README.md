@@ -6,6 +6,13 @@ SegStream captures your screen and webcam simultaneously, runs YOLO segmentation
 
 ---
 
+## Demo & Walkthrough
+
+Curious to see how it looks and why it was built? Check out the included demonstration video:
+[🎬 Watch the Demo & Walkthrough (`recordings/Demo_and_Walkthrough.webm`)](recordings/Demo_and_Walkthrough.webm)
+
+---
+
 ## Why SegStream?
 
 OBS is great, but it's bloated for a simple use case: **record your screen with a webcam overlay that has no background**. Most virtual background tools either need a green screen or run through clunky browser extensions. SegStream handles it natively — one tool, no dependencies on third-party plugins.
