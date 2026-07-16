@@ -155,8 +155,9 @@ SegStream pushes frames to `rtsp://localhost:8554/segstream`. Use this URL in OB
 - [x] Frontend — screen/webcam capture, drag-and-drop overlay UI
 - [x] Local recording (MP4 output via OpenCV/FFmpeg)
 - [x] RTSP streaming support
-- [ ] Audio capture and sync
+- [x] Audio capture and sync
 - [ ] Multi-person segmentation
+- [x] Floating record button & Provider UI
 - [ ] Desktop app wrapper (Electron / Tauri)
 
 ---
