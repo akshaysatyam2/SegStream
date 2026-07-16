@@ -295,11 +295,10 @@ async def _processing_loop() -> None:
         # Throttle to target FPS.
         elapsed = time.monotonic() - t0
         sleep_time = target_interval - elapsed
-        if sleep_time > 0.1:
+        if sleep_time > 0:
             await asyncio.sleep(sleep_time)
         else:
-            # If we're behind, yield briefly to keep the event loop responsive.
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)  # Yield briefly to keep event loop responsive
 
 
 def _process_frame_pair(
@@ -320,6 +319,16 @@ def _process_frame_pair(
 # ║  REST API Handlers                                                    ║
 # ╚═════════════════════════════════════════════════════════════════════════╝
 
+def _provider_label(provider_name: str) -> str:
+    """Map ONNX Runtime provider name to a short human-readable label."""
+    labels = {
+        "CUDAExecutionProvider": "CUDA (GPU)",
+        "OpenVINOExecutionProvider": "OpenVINO",
+        "CPUExecutionProvider": "CPU",
+    }
+    return labels.get(provider_name, provider_name)
+
+
 async def status_handler(request: web.Request) -> web.Response:
     """``GET /api/status`` — Return server health and runtime info.
 
@@ -331,6 +340,7 @@ async def status_handler(request: web.Request) -> web.Response:
         "status": "running",
         "version": "0.1.0",
         "provider": provider_name,
+        "provider_label": _provider_label(provider_name),
         "peers": len(peer_connections),
         "recording": {
             "active": recorder.is_recording,
